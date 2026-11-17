@@ -21,8 +21,6 @@ The positioning screen lets you place the chat anywhere on the screen. Alignment
 - **Center** — messages centered
 - **Right** — messages aligned to the right edge
 
-![The Positioning Editor](https://s.iimg.su/s/27/gAVej09xXDywWQXyHvV9l0RAQoyCWcQXhq1vbV8g.png)
-
 ### Anti-Spam System
 
 Automatically merges repeated messages and shows a counter (e.g., "x3"). Can be enabled or disabled in settings.
