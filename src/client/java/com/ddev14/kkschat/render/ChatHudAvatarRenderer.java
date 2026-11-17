@@ -28,7 +28,7 @@ public final class ChatHudAvatarRenderer {
 	private static final ItemStack NETHERITE_STACK = new ItemStack(Items.NETHERITE_INGOT);
 	private static final ItemStack CLOCK_STACK = new ItemStack(Items.CLOCK);
 	private static final ItemStack STICK_STACK = new ItemStack(Items.STICK);
-	private static final ItemStack BED_STACK = new ItemStack(Items.RED_BED);
+	private static final ItemStack BED_STACK = new ItemStack(Items.BED.red());
 	private static final ItemStack COMMAND_BLOCK_STACK = new ItemStack(Items.COMMAND_BLOCK);
 
 	public static void renderPlayerHead(GuiGraphicsExtractor guiGraphics, int x, int y, PlayerInfo owner, float opacity) {

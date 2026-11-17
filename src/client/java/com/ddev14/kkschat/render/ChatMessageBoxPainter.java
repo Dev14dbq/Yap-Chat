@@ -152,7 +152,7 @@ public final class ChatMessageBoxPainter {
 				case ERROR         -> ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
 						hud != null ? hud.getIconError()        : null, new net.minecraft.world.item.ItemStack(Items.BARRIER));
 				case SLEEP         -> ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
-						hud != null ? hud.getIconSleep()        : null, new net.minecraft.world.item.ItemStack(Items.RED_BED));
+						hud != null ? hud.getIconSleep()        : null, new net.minecraft.world.item.ItemStack(Items.BED.red()));
 				case SCREENSHOT    -> ChatHudAvatarRenderer.renderCameraIcon(guiGraphics, avatarX, avatarY, alpha);
 				case COMMAND_BLOCK -> ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
 						hud != null ? hud.getIconCommandBlock() : null, new net.minecraft.world.item.ItemStack(Items.COMMAND_BLOCK));

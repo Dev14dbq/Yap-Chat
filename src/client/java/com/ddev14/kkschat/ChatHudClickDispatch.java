@@ -21,7 +21,7 @@ public final class ChatHudClickDispatch {
 
 	public static boolean handleMessageClick(KksChatHud hud, double mouseX, double mouseY) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (!(minecraft.screen instanceof ChatScreen)) {
+		if (!(minecraft.gui.screen() instanceof ChatScreen)) {
 			return false;
 		}
 
@@ -120,7 +120,7 @@ public final class ChatHudClickDispatch {
 				minecraft.player.connection.sendCommand(cmd);
 			}
 		} else if (clickEvent instanceof ClickEvent.SuggestCommand suggest) {
-			if (minecraft.screen instanceof ChatScreen chatScreen) {
+			if (minecraft.gui.screen() instanceof ChatScreen chatScreen) {
 				String cmd = suggest.command();
 				if (!cmd.startsWith("/")) cmd = "/" + cmd;
 				chatScreen.handleChatInput(cmd, true);

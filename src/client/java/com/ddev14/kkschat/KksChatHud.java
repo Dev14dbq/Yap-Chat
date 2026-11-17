@@ -171,7 +171,7 @@ public class KksChatHud {
 	 */
 	public void handleMouseScroll(double delta) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.screen instanceof ChatScreen) {
+		if (minecraft.gui.screen() instanceof ChatScreen) {
 			// Прокрутка вверх (delta > 0) - показываем более старые сообщения
 			// Прокрутка вниз (delta < 0) - показываем более новые сообщения
 			if (delta > 0) {
@@ -200,11 +200,11 @@ public class KksChatHud {
 		// Всегда рисуем наш HUD (ранее проверяли конфиг)
 		
 		// Проверяем, открыт ли чат
-		boolean chatOpen = minecraft.screen instanceof ChatScreen;
+		boolean chatOpen = minecraft.gui.screen() instanceof ChatScreen;
 		
 		if (chatOpen) {
 			ChatHudSceneRenderer.renderOpenHistory(this, guiGraphics, minecraft);
-			if (minecraft.screen != null) {
+			if (minecraft.gui.screen() != null) {
 				double mouseX = minecraft.mouseHandler.xpos();
 				double mouseY = minecraft.mouseHandler.ypos();
 				renderTooltip(guiGraphics, (int)mouseX, (int)mouseY);
@@ -331,12 +331,12 @@ public class KksChatHud {
 	 */
 	private void clearVanillaChat() {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft == null || minecraft.gui == null || minecraft.gui.getChat() == null) {
+		if (minecraft == null || minecraft.gui == null || minecraft.gui.hud == null || minecraft.gui.hud.getChat() == null) {
 			return;
 		}
 		
 		// Очищаем стандартный чат (сообщения уже сохранены в нашем HUD)
-		minecraft.gui.getChat().clearMessages(false);
+		minecraft.gui.hud.getChat().clearMessages(false);
 	}
 	
 	/**
