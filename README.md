@@ -94,3 +94,9 @@ When opening chat (key `T`), the full message history is shown with scrolling. R
 ## Support
 
 If you have questions or suggestions, message on Discord: **ddev14**
+
+---
+
+## License
+
+This project is licensed under the [GNU General Public License v3.0](LICENSE).
