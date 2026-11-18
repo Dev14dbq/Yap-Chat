@@ -2,6 +2,7 @@ package com.ddev14.kkschat;
 
 import com.ddev14.kkschat.chat.ChatAnimationType;
 import com.ddev14.kkschat.chat.ChatRule;
+import com.ddev14.kkschat.pipeline.ServerPattern;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -54,6 +55,8 @@ final class KksChatConfig {
 		String iconJoinLeave    = "minecraft:oak_door";
 		// Rules
 		List<ChatRule> rules    = new ArrayList<>();
+		// Server / plugin message formats
+		List<ServerPattern.Config> serverPatterns = new ArrayList<>();
 		// Animation
 		String animationIn  = "FADE";
 		String animationOut = "FADE";
@@ -76,7 +79,7 @@ final class KksChatConfig {
 
 				+ "\n"
 				+ "  // Modify message text (stylization, reformatting).\n"
-				+ "  // Reserved for future use — has no effect yet.\n"
+				+ "  // false = show every message exactly as the server sent it (types and icons still work).\n"
 				+ "  \"modifyMessageText\": " + hud.isModifyMessageText() + ",\n"
 
 				+ "\n"
@@ -132,6 +135,20 @@ final class KksChatConfig {
 				+ "  // Background color per message type. Hex string, e.g. \"#1A0028\".\n"
 				+ "  // Use \"#000000\" for the default black background.\n"
 				+ "  \"bgColors\": " + GSON.toJson(hud.bgColors) + ",\n"
+
+				+ "\n"
+				+ "  // ── Server message formats ─────────────────────────────────────────────\n"
+				+ "  // Teach KKS Chat the chat / private-message format of your server.\n"
+				+ "  // Checked before the built-in formats (EssentialsX, CMI, Hypixel-style, vanilla).\n"
+				+ "  // \"regex\" is matched against the whole visible message text. Named groups:\n"
+				+ "  //   from / to — author / recipient of a private message (\"me\", \"я\" or your nick = you)\n"
+				+ "  //   name      — author of a chat line (must be online) or player who joined/left\n"
+				+ "  //   body      — the message itself\n"
+				+ "  // \"type\" is a MessageType name (see Rules below).\n"
+				+ "  //\n"
+				+ "  // Example — \"✉ Steve » you: hi\":\n"
+				+ "  //   { \"id\": \"my-server-pm\", \"regex\": \"^✉ (?<from>\\\\w+) » (?<to>\\\\w+): (?<body>.*)$\", \"type\": \"WHISPER\" }\n"
+				+ "  \"serverPatterns\": " + GSON.toJson(hud.serverPatternConfigs) + ",\n"
 
 				+ "\n"
 				+ "  // ── Rules ────────────────────────────────────────────────────────────\n"
@@ -199,6 +216,19 @@ final class KksChatConfig {
 			hud.iconJoinLeave    = nonNull(d.iconJoinLeave,    "minecraft:oak_door");
 			hud.rules.clear();
 			if (d.rules != null) hud.rules.addAll(d.rules);
+			hud.serverPatterns.clear();
+			hud.serverPatternConfigs.clear();
+			if (d.serverPatterns != null) {
+				for (ServerPattern.Config c : d.serverPatterns) {
+					if (c == null) continue;
+					hud.serverPatternConfigs.add(c);
+					try {
+						hud.serverPatterns.add(ServerPattern.compile(c));
+					} catch (IllegalArgumentException e) {
+						LoggerFactory.getLogger("KksChatConfig").warn("Ignoring server pattern {}: {}", c.id, e.getMessage());
+					}
+				}
+			}
 			if (d.animationIn != null) {
 				try { hud.animationIn = ChatAnimationType.valueOf(d.animationIn.toUpperCase()); }
 				catch (IllegalArgumentException ignored) { hud.animationIn = ChatAnimationType.FADE; }

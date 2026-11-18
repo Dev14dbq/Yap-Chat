@@ -66,11 +66,6 @@ public final class ChatHudSceneRenderer {
 			if (outOfBounds) break;
 		}
 
-		if (hud.messageHistory.isEmpty()
-				|| (now - hud.messageHistory.get(hud.messageHistory.size() - 1).timestamp > displayTimeMs)) {
-			hud.messageComponent = null;
-			hud.senderInfo = null;
-		}
 	}
 
 	public static void renderOpenHistory(KksChatHud hud, GuiGraphicsExtractor guiGraphics, Minecraft minecraft) {

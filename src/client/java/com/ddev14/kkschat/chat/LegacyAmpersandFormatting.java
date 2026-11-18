@@ -12,6 +12,11 @@ import net.minecraft.network.chat.Style;
 public final class LegacyAmpersandFormatting {
 	private LegacyAmpersandFormatting() {}
 
+	/** ChatFormatting.isColor() was removed in 26.2: color codes are the entries before OBFUSCATED (0-9, a-f). */
+	private static boolean isColorCode(ChatFormatting fmt) {
+		return fmt.ordinal() < ChatFormatting.OBFUSCATED.ordinal();
+	}
+
 	public static Component applyLegacyColorCodesForSystem(String text) {
 		MutableComponent result = Component.empty();
 		Style style = Style.EMPTY.withColor(ChatFormatting.GRAY);
@@ -31,7 +36,7 @@ public final class LegacyAmpersandFormatting {
 
 					if (fmt == ChatFormatting.RESET) {
 						style = Style.EMPTY.withColor(ChatFormatting.GRAY);
-					} else if (fmt.isColor()) {
+					} else if (isColorCode(fmt)) {
 						// цвет игнорируем — системные серые
 					} else {
 						switch (fmt) {
@@ -110,7 +115,7 @@ public final class LegacyAmpersandFormatting {
 
 					if (fmt == ChatFormatting.RESET) {
 						style = Style.EMPTY.withColor(ChatFormatting.LIGHT_PURPLE);
-					} else if (fmt.isColor()) {
+					} else if (isColorCode(fmt)) {
 						// ignore
 					} else {
 						switch (fmt) {
@@ -158,7 +163,7 @@ public final class LegacyAmpersandFormatting {
 
 					if (fmt == ChatFormatting.RESET) {
 						style = Style.EMPTY.withColor(ChatFormatting.GREEN);
-					} else if (fmt.isColor()) {
+					} else if (isColorCode(fmt)) {
 						// ignore
 					} else {
 						switch (fmt) {
@@ -214,7 +219,7 @@ public final class LegacyAmpersandFormatting {
 						style = defaultColor != null
 								? Style.EMPTY.withColor(defaultColor)
 								: Style.EMPTY;
-					} else if (fmt.isColor()) {
+					} else if (isColorCode(fmt)) {
 						style = style.withColor(fmt);
 					} else {
 						switch (fmt) {

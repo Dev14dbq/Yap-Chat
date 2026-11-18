@@ -89,3 +89,47 @@ publishing {
 		// Add repositories to publish to here.
 	}
 }
+
+// ── Unit tests ─────────────────────────────────────────────────────────────
+// Tests live in src/test and exercise client-side classes that need no running game
+// (message classification, component helpers).
+sourceSets {
+	test {
+		compileClasspath += sourceSets.client.output + sourceSets.client.compileClasspath
+		runtimeClasspath += sourceSets.client.output + sourceSets.client.runtimeClasspath
+	}
+}
+
+dependencies {
+	testImplementation platform("org.junit:junit-bom:5.11.4")
+	testImplementation "org.junit.jupiter:junit-jupiter"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "failed"
+		exceptionFormat "full"
+	}
+}
+
+// ── In-game tests ──────────────────────────────────────────────────────────
+// ./gradlew runClientGameTest starts a real client, creates a world, sends messages of
+// every kind and checks how KKS Chat classified them (src/gametest).
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = "kks-chat-gametest"
+		enableGameTests = false
+		enableClientGameTests = true
+		eula = true
+	}
+}
+
+sourceSets {
+	gametest {
+		compileClasspath += sourceSets.client.output
+		runtimeClasspath += sourceSets.client.output
+	}
+}
