@@ -41,3 +41,6 @@ replay_*.log
 
 # Minecraft run logs
 logs/
+
+# Autotest run dir
+run-autotest/
