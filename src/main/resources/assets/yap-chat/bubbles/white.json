@@ -1,0 +1,12 @@
+{
+  "text_color": "#202020",
+  "text_shadow": false,
+  "padding_x": 5,
+  "padding_y": 4,
+  "min_opacity": 0.5,
+  "tail": true,
+  "tail_width": 6,
+  "tail_height": 4,
+  "tail_anchor": 4,
+  "tail_overlap": 1
+}
