@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"package": "com.ddev14.yapchat.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"YapChatMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
