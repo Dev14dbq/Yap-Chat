@@ -18,7 +18,7 @@ public final class LegacyAmpersandFormatting {
 	}
 
 	public static Component applyLegacyColorCodesForSystem(String text) {
-		MutableComponent result = Component.empty();
+		MutableComponent result = com.ddev14.yapchat.compat.Texts.empty();
 		Style style = Style.EMPTY.withColor(ChatFormatting.GRAY);
 		StringBuilder current = new StringBuilder();
 
@@ -30,7 +30,7 @@ public final class LegacyAmpersandFormatting {
 
 				if (fmt != null) {
 					if (current.length() > 0) {
-						result.append(Component.literal(current.toString()).setStyle(style));
+						result.append(com.ddev14.yapchat.compat.Texts.literal(current.toString()).setStyle(style));
 						current.setLength(0);
 					}
 
@@ -59,7 +59,7 @@ public final class LegacyAmpersandFormatting {
 		}
 
 		if (current.length() > 0) {
-			result.append(Component.literal(current.toString()).setStyle(style));
+			result.append(com.ddev14.yapchat.compat.Texts.literal(current.toString()).setStyle(style));
 		}
 
 		return result;
@@ -97,7 +97,7 @@ public final class LegacyAmpersandFormatting {
 	}
 
 	public static Component applyLegacyColorCodesForChallenge(String text) {
-		MutableComponent result = Component.empty();
+		MutableComponent result = com.ddev14.yapchat.compat.Texts.empty();
 		Style style = Style.EMPTY.withColor(ChatFormatting.LIGHT_PURPLE);
 		StringBuilder current = new StringBuilder();
 
@@ -109,7 +109,7 @@ public final class LegacyAmpersandFormatting {
 
 				if (fmt != null) {
 					if (current.length() > 0) {
-						result.append(Component.literal(current.toString()).setStyle(style));
+						result.append(com.ddev14.yapchat.compat.Texts.literal(current.toString()).setStyle(style));
 						current.setLength(0);
 					}
 
@@ -138,14 +138,14 @@ public final class LegacyAmpersandFormatting {
 		}
 
 		if (current.length() > 0) {
-			result.append(Component.literal(current.toString()).setStyle(style));
+			result.append(com.ddev14.yapchat.compat.Texts.literal(current.toString()).setStyle(style));
 		}
 
 		return result;
 	}
 
 	public static Component applyLegacyColorCodesForAchievement(String text) {
-		MutableComponent result = Component.empty();
+		MutableComponent result = com.ddev14.yapchat.compat.Texts.empty();
 		Style style = Style.EMPTY.withColor(ChatFormatting.GREEN);
 		StringBuilder current = new StringBuilder();
 
@@ -157,7 +157,7 @@ public final class LegacyAmpersandFormatting {
 
 				if (fmt != null) {
 					if (current.length() > 0) {
-						result.append(Component.literal(current.toString()).setStyle(style));
+						result.append(com.ddev14.yapchat.compat.Texts.literal(current.toString()).setStyle(style));
 						current.setLength(0);
 					}
 
@@ -186,7 +186,7 @@ public final class LegacyAmpersandFormatting {
 		}
 
 		if (current.length() > 0) {
-			result.append(Component.literal(current.toString()).setStyle(style));
+			result.append(com.ddev14.yapchat.compat.Texts.literal(current.toString()).setStyle(style));
 		}
 
 		return result;
@@ -197,7 +197,7 @@ public final class LegacyAmpersandFormatting {
 	}
 
 	public static Component applyLegacyColorCodes(String text, ChatFormatting defaultColor) {
-		MutableComponent result = Component.empty();
+		MutableComponent result = com.ddev14.yapchat.compat.Texts.empty();
 		Style style = defaultColor != null
 				? Style.EMPTY.withColor(defaultColor)
 				: Style.EMPTY;
@@ -211,7 +211,7 @@ public final class LegacyAmpersandFormatting {
 
 				if (fmt != null) {
 					if (current.length() > 0) {
-						result.append(Component.literal(current.toString()).setStyle(style));
+						result.append(com.ddev14.yapchat.compat.Texts.literal(current.toString()).setStyle(style));
 						current.setLength(0);
 					}
 
@@ -242,7 +242,7 @@ public final class LegacyAmpersandFormatting {
 		}
 
 		if (current.length() > 0) {
-			result.append(Component.literal(current.toString()).setStyle(style));
+			result.append(com.ddev14.yapchat.compat.Texts.literal(current.toString()).setStyle(style));
 		}
 
 		return result;

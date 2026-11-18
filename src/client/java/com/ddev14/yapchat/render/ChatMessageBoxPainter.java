@@ -68,7 +68,7 @@ public final class ChatMessageBoxPainter {
 
 		if (entry.repeatCount > 1 && !entry.isExpanded) {
 			MutableComponent withSuffix = component.copy();
-			MutableComponent suffix = Component.literal(" x" + entry.repeatCount)
+			MutableComponent suffix = com.ddev14.yapchat.compat.Texts.literal(" x" + entry.repeatCount)
 					.withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY));
 			withSuffix.append(suffix);
 			component = withSuffix;

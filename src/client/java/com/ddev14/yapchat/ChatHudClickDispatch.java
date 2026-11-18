@@ -117,11 +117,11 @@ public final class ChatHudClickDispatch {
 			case SUGGEST_COMMAND -> {
 				if (com.ddev14.yapchat.compat.Compat.screen() instanceof ChatScreen chatScreen) {
 					String cmd = value.startsWith("/") ? value : "/" + value;
-					chatScreen.handleChatInput(cmd, true);
+					chatScreen.sendMessage(cmd);
 				}
 			}
 			case OPEN_URL -> {
-				if (minecraft.options.chatLinks().get()) {
+				if (com.ddev14.yapchat.compat.Compat.chatLinks()) {
 					try {
 						java.awt.Desktop.getDesktop().browse(java.net.URI.create(value));
 					} catch (Exception e) {

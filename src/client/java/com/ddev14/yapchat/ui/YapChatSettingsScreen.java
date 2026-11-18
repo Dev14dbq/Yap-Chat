@@ -7,9 +7,7 @@ import com.ddev14.yapchat.bubble.ChatBubbles;
 import com.ddev14.yapchat.chat.ChatAnimationType;
 import com.ddev14.yapchat.chat.ChatDisplayTiming;
 import com.ddev14.yapchat.chat.ChatLayout;
-import com.ddev14.yapchat.mixin.client.OptionInstanceAccessor;
-import net.minecraft.client.OptionInstance;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.TranslatableComponent;
 import com.ddev14.yapchat.chat.ChatMessageEntry;
 import com.ddev14.yapchat.chat.MessageBounds;
 import com.ddev14.yapchat.chat.MessageType;
@@ -72,7 +70,7 @@ public class YapChatSettingsScreen extends Screen {
 			this.icon = icon;
 		}
 
-		Component title() { return Component.translatable("yapchat.ui.tab." + key); }
+		Component title() { return com.ddev14.yapchat.compat.Texts.translatable("yapchat.ui.tab." + key); }
 	}
 
 	/** One line in the option list. */
@@ -149,7 +147,7 @@ public class YapChatSettingsScreen extends Screen {
 	private long hoverSince;
 
 	public YapChatSettingsScreen(Screen parent) {
-		super(Component.translatable("yapchat.ui.title"));
+		super(com.ddev14.yapchat.compat.Texts.translatable("yapchat.ui.title"));
 		this.parent = parent;
 	}
 
@@ -178,7 +176,7 @@ public class YapChatSettingsScreen extends Screen {
 
 		chrome.clear();
 		int by = oy + oh - 16;
-		TextButton done = new TextButton(() -> Component.translatable("gui.done"), Kind.PRIMARY, this::onClose).width(90);
+		TextButton done = new TextButton(() -> com.ddev14.yapchat.compat.Texts.translatable("gui.done"), Kind.PRIMARY, this::onClose).width(90);
 		chrome.add(done.at(ox + ow - done.w, by));
 		// Two clicks: the first arms it ("Click again to reset"), the second within 3 s resets.
 		TextButton reset = new TextButton(() -> t(System.currentTimeMillis() < resetArmedUntil ? "reset.confirm" : "reset"),
@@ -225,7 +223,7 @@ public class YapChatSettingsScreen extends Screen {
 	// ── Rows per tab ─────────────────────────────────────────────────────────
 
 	private static Component t(String key, Object... args) {
-		return Component.translatable("yapchat.ui." + key, args);
+		return com.ddev14.yapchat.compat.Texts.translatable("yapchat.ui." + key, args);
 	}
 
 	private Row header(String key) {
@@ -290,7 +288,7 @@ public class YapChatSettingsScreen extends Screen {
 			}
 			case MINECRAFT -> {
 				rows.add(header("section.vanilla"));
-				for (OptionInstance<?> o : com.ddev14.yapchat.compat.Compat.chatOptions(minecraft.options)) {
+				for (net.minecraft.client.Option o : com.ddev14.yapchat.compat.Compat.chatOptions(minecraft.options)) {
 					Row r = vanillaRow(o);
 					if (r != null) rows.add(r);
 				}
@@ -340,57 +338,53 @@ public class YapChatSettingsScreen extends Screen {
 
 	// ── Vanilla chat options, drawn with our controls ────────────────────────
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	private Row vanillaRow(OptionInstance<?> raw) {
-		OptionInstance o = raw;
-		OptionInstanceAccessor acc = (OptionInstanceAccessor) (Object) o;
-		Component rawCaption = acc.yapchat$caption();
-		if (rawCaption.getString().startsWith("options.")) {
-			// some options (chat delay) have no own caption string: take it from the value label "Caption: value"
-			String full = acc.yapchat$toString().apply(o.get()).getString();
-			int colon = full.indexOf(": ");
-			if (colon > 0) rawCaption = Component.literal(full.substring(0, colon));
-		}
-		final Component caption = rawCaption;
-		java.util.function.Function<Object, Component> label = acc.yapchat$toString();
-		Component desc = null;
-		try {
-			desc = com.ddev14.yapchat.compat.Compat.optionTooltip(o);
-		} catch (RuntimeException ignored) {
-		}
-
+	/**
+	 * Before 1.19 vanilla options are Option objects (slider or cycle). A cycle option is driven
+	 * through its own vanilla CycleButton (kept off-screen), which knows the values and saves them.
+	 */
+	private Row vanillaRow(net.minecraft.client.Option opt) {
+		net.minecraft.client.Options options = minecraft.options;
 		UiWidget control;
-		Object values = o.values();
-		if (o.get() instanceof Boolean) {
-			control = new Toggle(() -> (Boolean) o.get(), v -> o.set(v));
-		} else if (VanillaValues.method(values, "toSliderValue") != null) {
-			// slider value sets (the interfaces are not public on every Minecraft version, hence reflection)
+		Supplier<Component> message;
+		if (opt instanceof net.minecraft.client.ProgressOption p) {
+			message = () -> p.getMessage(options);
 			control = new Slider(0, 1000, 1,
-					() -> (int) Math.round((double) VanillaValues.call(values, "toSliderValue", o.get()) * 1000),
-					v -> o.set(VanillaValues.call(values, "fromSliderValue", v / 1000.0)),
-					v -> valueText(label.apply(o.get()), caption).getString());
-			((Slider) control).reserveValue(64); // vanilla labels like "5.0 seconds"
-		} else if (VanillaValues.method(values, "valueListSupplier") != null) {
-			Object supplier = VanillaValues.call(values, "valueListSupplier");
-			List<Object> list = (List<Object>) VanillaValues.call(supplier, "getSelectedList");
-			control = new Choice<Object>(list, o::get, o::set, v -> valueText(label.apply(v), caption));
+					() -> (int) Math.round(p.toPct(p.get(options)) * 1000),
+					v -> p.set(options, p.toValue(v / 1000.0)),
+					v -> valueText(message.get(), com.ddev14.yapchat.compat.Texts.empty()).getString());
+			((Slider) control).reserveValue(64);
+		} else if (opt.createButton(options, 0, 0, 150) instanceof net.minecraft.client.gui.components.CycleButton<?> b) {
+			message = b::getMessage;
+			if (b.getValue() instanceof Boolean) {
+				control = new Toggle(() -> (Boolean) b.getValue(), v -> {
+					if (v != (Boolean) b.getValue()) b.onPress();
+				});
+			} else {
+				// the button can only step forward; both arrows step
+				control = new Choice<Integer>(List.of(-1, 0, 1), () -> 0, v -> {
+					if (v != 0) b.onPress();
+				}, v -> valueText(b.getMessage(), com.ddev14.yapchat.compat.Texts.empty()));
+			}
 		} else {
 			return null;
 		}
-		return new Row(caption, desc, ROW_H, false, control);
+		String full = message.get().getString();
+		int colon = full.indexOf(": ");
+		Component caption = com.ddev14.yapchat.compat.Texts.literal(colon > 0 ? full.substring(0, colon) : full);
+		return new Row(caption, null, ROW_H, false, control);
 	}
 
 	/** "Chat: Shown" → "Shown". */
 	private static Component valueText(Component full, Component caption) {
-		if (full.getContents() instanceof TranslatableContents tc && tc.getArgs().length == 2
+		if (full instanceof TranslatableComponent tc && tc.getArgs().length == 2
 				&& tc.getKey().startsWith("options.")) {
 			Object v = tc.getArgs()[1];
-			return v instanceof Component c ? c : Component.literal(String.valueOf(v));
+			return v instanceof Component c ? c : com.ddev14.yapchat.compat.Texts.literal(String.valueOf(v));
 		}
 		String s = full.getString(), prefix = caption.getString() + ": ";
-		if (s.startsWith(prefix)) return Component.literal(s.substring(prefix.length()));
+		if (s.startsWith(prefix)) return com.ddev14.yapchat.compat.Texts.literal(s.substring(prefix.length()));
 		int colon = s.indexOf(": ");
-		return Component.literal(colon > 0 ? s.substring(colon + 2) : s);
+		return com.ddev14.yapchat.compat.Texts.literal(colon > 0 ? s.substring(colon + 2) : s);
 	}
 
 	private static final List<MessageType> MESSAGE_ORDER = List.of(
@@ -500,7 +494,7 @@ public class YapChatSettingsScreen extends Screen {
 		g.fill(ox, oy, r, oy + oh, Theme.SIDEBAR);
 
 		g.blit(LOGO, ox + 8, oy + 9, 0f, 0f, 16, 16, 32, 32, 32, 32, Argb.white(1f));
-		g.text(font, Component.literal("Yap Chat"), ox + 30, oy + 9, Theme.TEXT, true);
+		g.text(font, com.ddev14.yapchat.compat.Texts.literal("Yap Chat"), ox + 30, oy + 9, Theme.TEXT, true);
 		String version = FabricLoader.getInstance().getModContainer("yap-chat")
 				.map(c -> c.getMetadata().getVersion().getFriendlyString()).orElse("");
 		g.text(font, version, ox + 30, oy + 19, Theme.TEXT_FAINT, true);
@@ -603,16 +597,16 @@ public class YapChatSettingsScreen extends Screen {
 	private List<ChatMessageEntry> previewEntries() {
 		String me = localName();
 		List<ChatMessageEntry> list = new ArrayList<>();
-		list.add(sample(Component.literal("Alex joined the game").withStyle(ChatFormatting.YELLOW), MessageType.JOIN_LEAVE, null));
-		list.add(sample(Component.literal("[").withStyle(ChatFormatting.GOLD).append(Component.literal(me))
-				.append("]:").append(Component.literal(" hi all!").withStyle(ChatFormatting.WHITE)), MessageType.PLAYER_CHAT, me));
-		ChatMessageEntry whisper = sample(Component.literal("[Steve]:").withStyle(ChatFormatting.GOLD)
-				.append(Component.literal(" psst").withStyle(ChatFormatting.WHITE)), MessageType.WHISPER, "Steve");
+		list.add(sample(com.ddev14.yapchat.compat.Texts.literal("Alex joined the game").withStyle(ChatFormatting.YELLOW), MessageType.JOIN_LEAVE, null));
+		list.add(sample(com.ddev14.yapchat.compat.Texts.literal("[").withStyle(ChatFormatting.GOLD).append(com.ddev14.yapchat.compat.Texts.literal(me))
+				.append("]:").append(com.ddev14.yapchat.compat.Texts.literal(" hi all!").withStyle(ChatFormatting.WHITE)), MessageType.PLAYER_CHAT, me));
+		ChatMessageEntry whisper = sample(com.ddev14.yapchat.compat.Texts.literal("[Steve]:").withStyle(ChatFormatting.GOLD)
+				.append(com.ddev14.yapchat.compat.Texts.literal(" psst").withStyle(ChatFormatting.WHITE)), MessageType.WHISPER, "Steve");
 		whisper.direction = Direction.INCOMING;
 		whisper.receiverName = me;
 		list.add(whisper);
-		list.add(sample(Component.literal("Got [Stone Age]").withStyle(ChatFormatting.GREEN), MessageType.ACHIEVEMENT, null));
-		list.add(sample(Component.literal("Unknown command").withStyle(ChatFormatting.RED), MessageType.ERROR, null));
+		list.add(sample(com.ddev14.yapchat.compat.Texts.literal("Got [Stone Age]").withStyle(ChatFormatting.GREEN), MessageType.ACHIEVEMENT, null));
+		list.add(sample(com.ddev14.yapchat.compat.Texts.literal("Unknown command").withStyle(ChatFormatting.RED), MessageType.ERROR, null));
 		return list;
 	}
 

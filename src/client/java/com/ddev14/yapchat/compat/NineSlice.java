@@ -40,20 +40,19 @@ public final class NineSlice {
 
 	private static Optional<Sprite> load(ResourceLocation sprite) {
 		ResourceLocation tex = Compat.id(sprite.getNamespace(), "textures/gui/sprites/" + sprite.getPath() + ".png");
-		var manager = Minecraft.getInstance().getResourceManager();
-		Optional<Resource> res = manager.getResource(tex);
-		if (res.isEmpty()) return Optional.empty();
+		InputStream res = Compat.open(tex);
+		if (res == null) return Optional.empty();
 		int w, h;
-		try (InputStream in = res.get().open(); NativeImage img = NativeImage.read(in)) {
+		try (InputStream in = res; NativeImage img = NativeImage.read(in)) {
 			w = img.getWidth();
 			h = img.getHeight();
 		} catch (Exception e) {
 			return Optional.empty();
 		}
 		int l = 0, t = 0, r = 0, b = 0;
-		Optional<Resource> meta = manager.getResource(Compat.id(tex.getNamespace(), tex.getPath() + ".mcmeta"));
-		if (meta.isPresent()) {
-			try (Reader reader = new InputStreamReader(meta.get().open(), StandardCharsets.UTF_8)) {
+		InputStream meta = Compat.open(Compat.id(tex.getNamespace(), tex.getPath() + ".mcmeta"));
+		if (meta != null) {
+			try (Reader reader = new InputStreamReader(meta, StandardCharsets.UTF_8)) {
 				JsonObject scaling = JsonParser.parseReader(reader).getAsJsonObject()
 						.getAsJsonObject("gui").getAsJsonObject("scaling");
 				if ("nine_slice".equals(scaling.get("type").getAsString())) {

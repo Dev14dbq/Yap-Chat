@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * The drawing calls Yap Chat uses, in one place. Each Minecraft version has its own
  * implementation of this class; the rest of the mod only talks to it.
- * (Minecraft 1.19.2: no GuiGraphics yet — PoseStack plus GuiComponent/Font/ItemRenderer calls;
+ * (Minecraft 1.18.2: no GuiGraphics yet — PoseStack plus GuiComponent/Font/ItemRenderer calls;
  * tints go through the shader color; sprites are nine-sliced by {@link NineSlice}.)
  */
 public final class Gfx {
@@ -140,14 +140,21 @@ public final class Gfx {
 			if (r[3] < r[1]) r[3] = r[1];
 		}
 		scissors.push(r);
-		GuiComponent.enableScissor(r[0], r[1], r[2], r[3]);
+		scissor(r);
 	}
 
 	public void disableScissor() {
 		scissors.poll();
 		int[] r = scissors.peek();
-		if (r == null) GuiComponent.disableScissor();
-		else GuiComponent.enableScissor(r[0], r[1], r[2], r[3]);
+		if (r == null) RenderSystem.disableScissor();
+		else scissor(r);
+	}
+
+	private static void scissor(int[] r) {
+		var w = mc().getWindow();
+		double s = w.getGuiScale();
+		RenderSystem.enableScissor((int) (r[0] * s), (int) (w.getHeight() - r[3] * s),
+				Math.max(0, (int) ((r[2] - r[0]) * s)), Math.max(0, (int) ((r[3] - r[1]) * s)));
 	}
 
 	/** Everything drawn after this goes above what was drawn before (popovers). */

@@ -5,7 +5,7 @@ import com.ddev14.yapchat.pipeline.ClassifiedMessage.Tier;
 import com.ddev14.yapchat.pipeline.Components.Identity;
 import com.ddev14.yapchat.pipeline.Components.VisibleText;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.List;
 import java.util.Locale;
@@ -133,9 +133,9 @@ public final class MessageClassifier {
 	}
 
 	private static ClassifiedMessage byTranslationKey(IncomingMessage in, Context ctx) {
-		Optional<TranslatableContents> found = Components.findTranslatable(in.content(), MessageClassifier::isKnownKey);
+		Optional<TranslatableComponent> found = Components.findTranslatable(in.content(), MessageClassifier::isKnownKey);
 		if (found.isEmpty()) return null;
-		TranslatableContents tc = found.get();
+		TranslatableComponent tc = found.get();
 		String key = tc.getKey();
 
 		switch (key) {

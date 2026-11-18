@@ -69,12 +69,12 @@ public final class RuleEngine {
             // text transforms (replaceText takes priority)
             String originalText = text; // snapshot before transforms for {text} variable
             if (a.replaceText != null) {
-                component = Component.literal(expandVars(a.replaceText, entry, ctx.matchedText, originalText));
+                component = com.ddev14.yapchat.compat.Texts.literal(expandVars(a.replaceText, entry, ctx.matchedText, originalText));
             } else {
                 if (a.replaceMatch != null && ctx.matchedText != null) {
                     String expanded = expandVars(a.replaceMatch, entry, ctx.matchedText, originalText);
                     String replaced = text.replace(ctx.matchedText, expanded);
-                    component = Component.literal(replaced);
+                    component = com.ddev14.yapchat.compat.Texts.literal(replaced);
                 }
                 if (a.colorMatch != null && ctx.matchedText != null) {
                     Integer rgb = parseHexColor(a.colorMatch);
@@ -88,7 +88,7 @@ public final class RuleEngine {
             if (a.color != null) {
                 Integer rgb = parseHexColor(a.color);
                 if (rgb != null) {
-                    MutableComponent colored = Component.empty()
+                    MutableComponent colored = com.ddev14.yapchat.compat.Texts.empty()
                             .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb)));
                     colored.append(component);
                     component = colored;
@@ -255,19 +255,19 @@ public final class RuleEngine {
         String full = comp.getString();
         if (!full.contains(match)) return comp;
 
-        MutableComponent result = Component.empty();
+        MutableComponent result = com.ddev14.yapchat.compat.Texts.empty();
         Style matchStyle = Style.EMPTY.withColor(TextColor.fromRgb(rgb));
         int start = 0;
         int idx;
         while ((idx = full.indexOf(match, start)) >= 0) {
             if (idx > start) {
-                result.append(Component.literal(full.substring(start, idx)));
+                result.append(com.ddev14.yapchat.compat.Texts.literal(full.substring(start, idx)));
             }
-            result.append(Component.literal(match).withStyle(matchStyle));
+            result.append(com.ddev14.yapchat.compat.Texts.literal(match).withStyle(matchStyle));
             start = idx + match.length();
         }
         if (start < full.length()) {
-            result.append(Component.literal(full.substring(start)));
+            result.append(com.ddev14.yapchat.compat.Texts.literal(full.substring(start)));
         }
         return result;
     }

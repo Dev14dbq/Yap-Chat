@@ -9,7 +9,6 @@
 		"MinecraftMixin",
 		"ChatOptionsScreenAccessor",
 		"OptionsSubScreenAccessor",
-		"OptionInstanceAccessor",
 		"GuiSetScreenMixin",
 		"GameRendererAccessor",
 		"ScreenAccessor",

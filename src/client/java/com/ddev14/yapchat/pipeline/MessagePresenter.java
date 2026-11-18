@@ -6,8 +6,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.LiteralContents;
-import net.minecraft.network.chat.ComponentContents;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -55,10 +53,10 @@ public final class MessagePresenter {
 		if (msg.body() == null || name == null) {
 			return convertLegacy(msg.origin().content(), LegacyAmpersandFormatting::applyLegacyColorCodesForSystem);
 		}
-		return Component.literal("[").withStyle(ChatFormatting.GOLD)
+		return com.ddev14.yapchat.compat.Texts.literal("[").withStyle(ChatFormatting.GOLD)
 				.append(name)
-				.append(Component.literal("]:"))
-				.append(Component.literal(" ").withStyle(ChatFormatting.WHITE))
+				.append(com.ddev14.yapchat.compat.Texts.literal("]:"))
+				.append(com.ddev14.yapchat.compat.Texts.literal(" ").withStyle(ChatFormatting.WHITE))
 				.append(body(msg.body()));
 	}
 
@@ -70,10 +68,10 @@ public final class MessagePresenter {
 				|| msg.tier() == ClassifiedMessage.Tier.TRANSLATION_KEY;
 		Component name = nameOrNull(msg.senderDisplay(), msg.senderName());
 		if (vanillaDecorated && msg.body() != null && name != null) {
-			return Component.literal("[").withStyle(ChatFormatting.GOLD)
+			return com.ddev14.yapchat.compat.Texts.literal("[").withStyle(ChatFormatting.GOLD)
 					.append(name)
-					.append(Component.literal("]:"))
-					.append(Component.literal(" ").withStyle(ChatFormatting.WHITE))
+					.append(com.ddev14.yapchat.compat.Texts.literal("]:"))
+					.append(com.ddev14.yapchat.compat.Texts.literal(" ").withStyle(ChatFormatting.WHITE))
 					.append(body(msg.body()));
 		}
 		// A plugin's own chat format: keep it exactly, only translate &-codes in plain text.
@@ -83,9 +81,9 @@ public final class MessagePresenter {
 	/** Name component in gold unless the server already colored it. */
 	private static Component nameOrNull(Component display, String plainName) {
 		if (display != null && !display.getString().isBlank()) {
-			return Component.empty().withStyle(ChatFormatting.GOLD).append(display);
+			return com.ddev14.yapchat.compat.Texts.empty().withStyle(ChatFormatting.GOLD).append(display);
 		}
-		if (plainName != null) return Component.literal(plainName).withStyle(ChatFormatting.GOLD);
+		if (plainName != null) return com.ddev14.yapchat.compat.Texts.literal(plainName).withStyle(ChatFormatting.GOLD);
 		return null;
 	}
 
@@ -94,7 +92,7 @@ public final class MessagePresenter {
 		if (isPlainWithLegacyCodes(body)) {
 			return LegacyAmpersandFormatting.applyLegacyColorCodes(body.getString(), ChatFormatting.WHITE);
 		}
-		return Component.empty().withStyle(ChatFormatting.WHITE).append(body);
+		return com.ddev14.yapchat.compat.Texts.empty().withStyle(ChatFormatting.WHITE).append(body);
 	}
 
 	// ── Helpers ──────────────────────────────────────────────────────────────
@@ -124,7 +122,7 @@ public final class MessagePresenter {
 			if (style.getColor() != null) styled[0] = true;
 			return java.util.Optional.empty();
 		}, Style.EMPTY);
-		return !styled[0] && (c.getContents() instanceof LiteralContents || c.getContents() == ComponentContents.EMPTY);
+		return !styled[0] && (c instanceof net.minecraft.network.chat.TextComponent);
 	}
 
 	private static final Map<String, String> MINECRAFT_ID_TO_KEY;
@@ -148,7 +146,7 @@ public final class MessagePresenter {
 	private static Component prettifyIds(Component component) {
 		String text = component.getString();
 		if (!text.contains("minecraft:") || !component.getSiblings().isEmpty()
-				|| !(component.getContents() instanceof LiteralContents)) {
+				|| !(component instanceof net.minecraft.network.chat.TextComponent)) {
 			return component;
 		}
 		String result = text;
@@ -159,6 +157,6 @@ public final class MessagePresenter {
 			String fallback = Character.toUpperCase(path.charAt(0)) + path.substring(1);
 			result = result.replace(e.getKey(), (lang.has(e.getValue()) ? lang.getOrDefault(e.getValue()) : fallback));
 		}
-		return result.equals(text) ? component : Component.literal(result).setStyle(component.getStyle());
+		return result.equals(text) ? component : com.ddev14.yapchat.compat.Texts.literal(result).setStyle(component.getStyle());
 	}
 }

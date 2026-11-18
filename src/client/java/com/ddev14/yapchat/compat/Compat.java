@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/** Small game calls whose names differ between Minecraft versions (this file: 1.19.2). */
+/** Small game calls whose names differ between Minecraft versions (this file: 1.18.2). */
 public final class Compat {
 	private Compat() {}
 
@@ -83,43 +83,24 @@ public final class Compat {
 		return LivingEntityRenderer.isEntityUpsideDown(player);
 	}
 
-	/** Registry id of the chat type ("minecraft:chat", "minecraft:msg_command_incoming", ...). */
-	public static String chatTypeId(net.minecraft.network.chat.ChatType.Bound params) {
-		var level = Minecraft.getInstance().level;
-		if (level == null) return null;
-		ResourceLocation key = level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY)
-				.getKey(params.chatType());
-		return key == null ? null : key.toString();
-	}
-
-	public static net.minecraft.network.chat.Component chatTarget(net.minecraft.network.chat.ChatType.Bound params) {
-		return params.targetName();
-	}
-
 	/** The vanilla chat options (shown on our Minecraft tab). */
-	public static net.minecraft.client.OptionInstance<?>[] chatOptions(net.minecraft.client.Options options) {
+	public static net.minecraft.client.Option[] chatOptions(net.minecraft.client.Options options) {
 		return ((com.ddev14.yapchat.mixin.client.ChatOptionsScreenAccessor)
 				new net.minecraft.client.gui.screens.ChatOptionsScreen(null, options)).yapchat$smallOptions();
 	}
 
-	/** Body of a signed chat message (the server's text). */
-	public static net.minecraft.network.chat.Component chatBody(net.minecraft.network.chat.PlayerChatMessage signed) {
-		return signed.unsignedContent().orElse(signed.serverContent());
+	/** A resource's data, or null if it does not exist. */
+	public static java.io.InputStream open(ResourceLocation id) {
+		try {
+			var manager = Minecraft.getInstance().getResourceManager();
+			return manager.hasResource(id) ? manager.getResource(id).getInputStream() : null;
+		} catch (java.io.IOException e) {
+			return null;
+		}
 	}
 
-	/** Tooltip of a vanilla option, as one text. */
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static net.minecraft.network.chat.Component optionTooltip(net.minecraft.client.OptionInstance option) {
-		var factory = ((com.ddev14.yapchat.mixin.client.OptionInstanceAccessor) (Object) option).yapchat$tooltip();
-		List<net.minecraft.util.FormattedCharSequence> lines = (List<net.minecraft.util.FormattedCharSequence>)
-				factory.apply(Minecraft.getInstance()).apply(option.get());
-		if (lines == null || lines.isEmpty()) return null;
-		StringBuilder sb = new StringBuilder();
-		for (net.minecraft.util.FormattedCharSequence line : lines) {
-			if (sb.length() > 0) sb.append(' ');
-			line.accept((i, style, cp) -> { sb.appendCodePoint(cp); return true; });
-		}
-		return net.minecraft.network.chat.Component.literal(sb.toString());
+	public static boolean chatLinks() {
+		return Minecraft.getInstance().options.chatLinks;
 	}
 
 	public static boolean showHat(Player player) {
@@ -130,8 +111,7 @@ public final class Compat {
 	public static void sendCommand(String command) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player == null) return;
-		String c = command.startsWith("/") ? command.substring(1) : command;
-		if (!mc.player.commandUnsigned(c)) mc.player.commandSigned(c, null);
+		mc.player.chat(command.startsWith("/") ? command : "/" + command);
 	}
 
 	public static void drawPlayer(Gfx g, int x1, int y1, int x2, int y2, int size, float yOffset,

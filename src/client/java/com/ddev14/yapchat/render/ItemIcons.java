@@ -53,7 +53,7 @@ public final class ItemIcons {
 
 	/** Display name that works without a world. */
 	public static Component name(Item item) {
-		return Component.translatable(item.getDescriptionId());
+		return com.ddev14.yapchat.compat.Texts.translatable(item.getDescriptionId());
 	}
 
 	public static void draw(Gfx g, Item item, int x, int y) {
@@ -84,9 +84,9 @@ public final class ItemIcons {
 			};
 			for (String c : candidates) {
 				ResourceLocation tex = com.ddev14.yapchat.compat.Compat.id(ns, c);
-				Optional<Resource> res = Minecraft.getInstance().getResourceManager().getResource(tex);
-				if (res.isEmpty()) continue;
-				try (InputStream in = res.get().open(); NativeImage img = NativeImage.read(in)) {
+				InputStream res = com.ddev14.yapchat.compat.Compat.open(tex);
+				if (res == null) continue;
+				try (InputStream in = res; NativeImage img = NativeImage.read(in)) {
 					// animated textures are vertical strips: draw the first 16x16 frame
 					int scale = Math.max(1, img.getWidth() / 16);
 					return Optional.of(new Flat(tex, img.getWidth() / scale, img.getHeight() / scale));

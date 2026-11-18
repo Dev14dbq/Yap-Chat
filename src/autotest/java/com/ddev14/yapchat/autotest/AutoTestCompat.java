@@ -9,7 +9,7 @@ import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 
 import java.lang.reflect.Method;
 
-/** Version-specific bits of the dev autotest (this file: 1.19.2). */
+/** Version-specific bits of the dev autotest (this file: 1.18.2). */
 final class AutoTestCompat {
 	private AutoTestCompat() {}
 
@@ -20,7 +20,7 @@ final class AutoTestCompat {
 
 	static void createWorld() {
 		Minecraft mc = Minecraft.getInstance();
-		CreateWorldScreen.openFresh(mc, mc.screen);
+		mc.setScreen(CreateWorldScreen.createFresh(mc.screen));
 		mc.execute(() -> {
 			try {
 				CreateWorldScreen s = (CreateWorldScreen) mc.screen;
@@ -43,7 +43,7 @@ final class AutoTestCompat {
 	}
 
 	static void sendChat(String text) {
-		Minecraft.getInstance().player.chatSigned(text, null);
+		Minecraft.getInstance().player.chat(text);
 	}
 
 	static void sendCommand(String command) {

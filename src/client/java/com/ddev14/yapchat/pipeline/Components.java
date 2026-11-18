@@ -6,7 +6,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,36 +49,36 @@ public final class Components {
 	 * Looks at the root, its siblings and translation arguments, so messages that a server
 	 * wrapped into {@code literal("").append(translatable(...))} are still recognised.
 	 */
-	public static Optional<TranslatableContents> findTranslatable(Component component, Predicate<String> keyMatches) {
+	public static Optional<TranslatableComponent> findTranslatable(Component component, Predicate<String> keyMatches) {
 		if (component == null) return Optional.empty();
-		if (component.getContents() instanceof TranslatableContents tc) {
+		if (component instanceof TranslatableComponent tc) {
 			if (keyMatches.test(tc.getKey())) return Optional.of(tc);
 			for (Object arg : tc.getArgs()) {
 				if (arg instanceof Component c) {
-					Optional<TranslatableContents> found = findTranslatable(c, keyMatches);
+					Optional<TranslatableComponent> found = findTranslatable(c, keyMatches);
 					if (found.isPresent()) return found;
 				}
 			}
 		}
 		for (Component sibling : component.getSiblings()) {
-			Optional<TranslatableContents> found = findTranslatable(sibling, keyMatches);
+			Optional<TranslatableComponent> found = findTranslatable(sibling, keyMatches);
 			if (found.isPresent()) return found;
 		}
 		return Optional.empty();
 	}
 
 	/** Argument {@code index} of a translatable as a component (strings are wrapped); null if absent. */
-	public static Component arg(TranslatableContents tc, int index) {
+	public static Component arg(TranslatableComponent tc, int index) {
 		Object[] args = tc.getArgs();
 		if (index < 0 || index >= args.length) return null;
 		Object a = args[index];
 		if (a instanceof Component c) return c;
-		return a == null ? null : Component.literal(String.valueOf(a));
+		return a == null ? null : com.ddev14.yapchat.compat.Texts.literal(String.valueOf(a));
 	}
 
 	/** The last component argument of the root translatable — the body for vanilla chat decorations. */
 	public static Component lastArg(Component component) {
-		if (component != null && component.getContents() instanceof TranslatableContents tc && tc.getArgs().length > 0) {
+		if (component != null && component instanceof TranslatableComponent tc && tc.getArgs().length > 0) {
 			return arg(tc, tc.getArgs().length - 1);
 		}
 		return null;
@@ -185,13 +185,13 @@ public final class Components {
 	 * keeping every piece's style — colors, hover and click events survive.
 	 */
 	public static Component sliceFrom(Component component, int start) {
-		MutableComponent out = Component.empty();
+		MutableComponent out = com.ddev14.yapchat.compat.Texts.empty();
 		int[] pos = {0};
 		component.visit((style, text) -> {
 			int from = pos[0];
 			int to = from + text.length();
 			if (to > start && !text.isEmpty()) {
-				out.append(Component.literal(text.substring(Math.max(0, start - from))).setStyle(style));
+				out.append(com.ddev14.yapchat.compat.Texts.literal(text.substring(Math.max(0, start - from))).setStyle(style));
 			}
 			pos[0] = to;
 			return Optional.empty();

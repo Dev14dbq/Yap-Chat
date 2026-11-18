@@ -58,9 +58,9 @@ public final class BubbleSkins implements SimpleSynchronousResourceReloadListene
 		String key = style.name().toLowerCase(Locale.ROOT);
 		JsonObject o = new JsonObject();
 		ResourceLocation json = com.ddev14.yapchat.compat.Compat.id("yap-chat", "bubbles/" + key + ".json");
-		Optional<Resource> res = manager.getResource(json);
-		if (res.isPresent()) {
-			try (Reader r = res.get().openAsReader()) {
+		java.io.InputStream res = com.ddev14.yapchat.compat.Compat.open(json);
+		if (res != null) {
+			try (Reader r = new java.io.InputStreamReader(res, java.nio.charset.StandardCharsets.UTF_8)) {
 				o = JsonParser.parseReader(r).getAsJsonObject();
 			} catch (Exception e) {
 				LOG.warn("Bad bubble style file {}: {}", json, e.getMessage());

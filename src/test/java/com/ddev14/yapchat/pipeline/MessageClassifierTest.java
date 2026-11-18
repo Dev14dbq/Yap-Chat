@@ -35,13 +35,13 @@ class MessageClassifierTest {
 	}
 
 	private static ClassifiedMessage system(String text) {
-		return system(Component.literal(text));
+		return system(com.ddev14.yapchat.compat.Texts.literal(text));
 	}
 
 	private static ClassifiedMessage chat(String chatType, Component senderDisplay, Component target,
 			String profile, String body) {
-		Component bodyC = Component.literal(body);
-		Component full = Component.translatable("chat.type.text", senderDisplay, bodyC);
+		Component bodyC = com.ddev14.yapchat.compat.Texts.literal(body);
+		Component full = com.ddev14.yapchat.compat.Texts.translatable("chat.type.text", senderDisplay, bodyC);
 		IncomingMessage in = new IncomingMessage(full, Source.PLAYER_CHAT, chatType, senderDisplay, target,
 				profile != null ? UUID.nameUUIDFromBytes(profile.getBytes()) : null, profile, bodyC, false);
 		return MessageClassifier.classify(in, CTX);
@@ -49,13 +49,13 @@ class MessageClassifierTest {
 
 	/** A player name as vanilla decorates it: visible text plus the profile name in the insertion. */
 	private static MutableComponent vanillaName(String name) {
-		return Component.literal(name).setStyle(Style.EMPTY
+		return com.ddev14.yapchat.compat.Texts.literal(name).setStyle(Style.EMPTY
 				.withInsertion(name)
 				.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tell " + name + " ")));
 	}
 
 	private static Component red(String text) {
-		return Component.literal(text).withStyle(ChatFormatting.RED);
+		return com.ddev14.yapchat.compat.Texts.literal(text).withStyle(ChatFormatting.RED);
 	}
 
 	// ── 1. Chat type (player chat packets) ───────────────────────────────────
@@ -100,7 +100,7 @@ class MessageClassifierTest {
 
 		@Test
 		void rankedDisplayNameStillResolvesProfileName() {
-			Component display = Component.literal("[Admin] ").append(vanillaName("Jeb_"));
+			Component display = com.ddev14.yapchat.compat.Texts.literal("[Admin] ").append(vanillaName("Jeb_"));
 			ClassifiedMessage m = chat("minecraft:chat", display, null, null, "hi");
 			assertEquals("Jeb_", m.senderName());
 		}
@@ -113,32 +113,32 @@ class MessageClassifierTest {
 		@Test
 		void joinWrappedInLiteralIsFound() {
 			// Plugins often wrap vanilla messages: literal("").append(translatable(...)).
-			Component c = Component.empty().append(
-					Component.translatable("multiplayer.player.joined", vanillaName("Steve")).withStyle(ChatFormatting.YELLOW));
+			Component c = com.ddev14.yapchat.compat.Texts.empty().append(
+					com.ddev14.yapchat.compat.Texts.translatable("multiplayer.player.joined", vanillaName("Steve")).withStyle(ChatFormatting.YELLOW));
 			assertEquals(MessageType.JOIN_LEAVE, system(c).type());
 		}
 
 		@Test
 		void advancementKinds() {
 			assertEquals(MessageType.ACHIEVEMENT,
-					system(Component.translatable("chat.type.advancement.task", vanillaName("Steve"), Component.literal("Stone Age"))).type());
+					system(com.ddev14.yapchat.compat.Texts.translatable("chat.type.advancement.task", vanillaName("Steve"), com.ddev14.yapchat.compat.Texts.literal("Stone Age"))).type());
 			assertEquals(MessageType.ACHIEVEMENT,
-					system(Component.translatable("chat.type.advancement.goal", vanillaName("Steve"), Component.literal("Sky's the Limit"))).type());
+					system(com.ddev14.yapchat.compat.Texts.translatable("chat.type.advancement.goal", vanillaName("Steve"), com.ddev14.yapchat.compat.Texts.literal("Sky's the Limit"))).type());
 			assertEquals(MessageType.CHALLENGE,
-					system(Component.translatable("chat.type.advancement.challenge", vanillaName("Steve"), Component.literal("Arbalistic"))).type());
+					system(com.ddev14.yapchat.compat.Texts.translatable("chat.type.advancement.challenge", vanillaName("Steve"), com.ddev14.yapchat.compat.Texts.literal("Arbalistic"))).type());
 		}
 
 		@Test
 		void whisperKeysCarryDirectionAndNames() {
-			ClassifiedMessage in = system(Component.translatable("commands.message.display.incoming",
-					vanillaName("Alex"), Component.literal("psst")));
+			ClassifiedMessage in = system(com.ddev14.yapchat.compat.Texts.translatable("commands.message.display.incoming",
+					vanillaName("Alex"), com.ddev14.yapchat.compat.Texts.literal("psst")));
 			assertEquals(MessageType.WHISPER, in.type());
 			assertEquals(Direction.INCOMING, in.direction());
 			assertEquals("Alex", in.senderName());
 			assertEquals("psst", in.body().getString());
 
-			ClassifiedMessage out = system(Component.translatable("commands.message.display.outgoing",
-					vanillaName("Alex"), Component.literal("ok")));
+			ClassifiedMessage out = system(com.ddev14.yapchat.compat.Texts.translatable("commands.message.display.outgoing",
+					vanillaName("Alex"), com.ddev14.yapchat.compat.Texts.literal("ok")));
 			assertEquals(Direction.OUTGOING, out.direction());
 			assertEquals("Alex", out.receiverName());
 			assertEquals(ME, out.senderName());
@@ -146,7 +146,7 @@ class MessageClassifierTest {
 
 		@Test
 		void chatTypeTextViaSystemChannel() {
-			ClassifiedMessage m = system(Component.translatable("chat.type.text", vanillaName("Steve"), Component.literal("hey")));
+			ClassifiedMessage m = system(com.ddev14.yapchat.compat.Texts.translatable("chat.type.text", vanillaName("Steve"), com.ddev14.yapchat.compat.Texts.literal("hey")));
 			assertEquals(MessageType.PLAYER_CHAT, m.type());
 			assertEquals("Steve", m.senderName());
 			assertEquals("hey", m.body().getString());
@@ -154,28 +154,28 @@ class MessageClassifierTest {
 
 		@Test
 		void bedMessagesFromActionBar() {
-			IncomingMessage in = IncomingMessage.system(Component.translatable("block.minecraft.bed.not_safe"), true);
+			IncomingMessage in = IncomingMessage.system(com.ddev14.yapchat.compat.Texts.translatable("block.minecraft.bed.not_safe"), true);
 			assertEquals(MessageType.SLEEP, MessageClassifier.classify(in, CTX).type());
 		}
 
 		@Test
 		void commandBlockAndScreenshotAndErrors() {
 			assertEquals(MessageType.COMMAND_BLOCK,
-					system(Component.translatable("chat.type.admin", Component.literal("@"), Component.literal("Set the time"))).type());
+					system(com.ddev14.yapchat.compat.Texts.translatable("chat.type.admin", com.ddev14.yapchat.compat.Texts.literal("@"), com.ddev14.yapchat.compat.Texts.literal("Set the time"))).type());
 			assertEquals(MessageType.SCREENSHOT,
-					system(Component.translatable("screenshot.success", Component.literal("2026-11-18.png"))).type());
+					system(com.ddev14.yapchat.compat.Texts.translatable("screenshot.success", com.ddev14.yapchat.compat.Texts.literal("2026-11-18.png"))).type());
 			assertEquals(MessageType.ERROR,
-					system(Component.translatable("command.unknown.command").withStyle(ChatFormatting.RED)).type());
+					system(com.ddev14.yapchat.compat.Texts.translatable("command.unknown.command").withStyle(ChatFormatting.RED)).type());
 			// Second line of a command error: "tell @s hi<--[HERE]"
-			assertEquals(MessageType.ERROR, system(Component.empty().withStyle(ChatFormatting.GRAY)
-					.append(Component.literal("tell @s hi"))
-					.append(Component.translatable("command.context.here").withStyle(ChatFormatting.RED))).type());
+			assertEquals(MessageType.ERROR, system(com.ddev14.yapchat.compat.Texts.empty().withStyle(ChatFormatting.GRAY)
+					.append(com.ddev14.yapchat.compat.Texts.literal("tell @s hi"))
+					.append(com.ddev14.yapchat.compat.Texts.translatable("command.context.here").withStyle(ChatFormatting.RED))).type());
 		}
 
 		@Test
 		void unrelatedKeysAreSystem() {
 			// A death message mentions players but is neither chat nor join.
-			ClassifiedMessage m = system(Component.translatable("death.attack.player", vanillaName("Steve"), vanillaName("Alex")));
+			ClassifiedMessage m = system(com.ddev14.yapchat.compat.Texts.translatable("death.attack.player", vanillaName("Steve"), vanillaName("Alex")));
 			assertEquals(MessageType.SYSTEM, m.type());
 		}
 	}
@@ -264,8 +264,8 @@ class MessageClassifierTest {
 
 		@Test
 		void legacyCodesAreIgnoredForMatchingAndBodyKeepsStyle() {
-			Component c = Component.literal("§7[§cSteve §7-> §cme§7] ")
-					.append(Component.literal("click me").withStyle(Style.EMPTY
+			Component c = com.ddev14.yapchat.compat.Texts.literal("§7[§cSteve §7-> §cme§7] ")
+					.append(com.ddev14.yapchat.compat.Texts.literal("click me").withStyle(Style.EMPTY
 							.withColor(ChatFormatting.AQUA)
 							.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/spawn"))));
 			ClassifiedMessage m = system(c);
@@ -287,7 +287,7 @@ class MessageClassifierTest {
 					new ServerPattern.Config("mine", "^✉ (?<from>\\w+) » (?<to>\\w+): (?<body>.*)$", "WHISPER"));
 			MessageClassifier.Context ctx = new MessageClassifier.Context(ME, n -> true, List.of(custom));
 			ClassifiedMessage m = MessageClassifier.classify(
-					IncomingMessage.system(Component.literal("✉ Steve » you: hi"), false), ctx);
+					IncomingMessage.system(com.ddev14.yapchat.compat.Texts.literal("✉ Steve » you: hi"), false), ctx);
 			assertEquals(MessageType.WHISPER, m.type());
 			assertEquals(Direction.INCOMING, m.direction());
 			assertEquals("Steve", m.senderName());
@@ -315,7 +315,7 @@ class MessageClassifierTest {
 
 		@Test
 		void partlyRedIsNotError() {
-			Component c = Component.literal("Server: ").withStyle(ChatFormatting.GOLD).append(red("restart soon"));
+			Component c = com.ddev14.yapchat.compat.Texts.literal("Server: ").withStyle(ChatFormatting.GOLD).append(red("restart soon"));
 			assertEquals(MessageType.SYSTEM, system(c).type());
 		}
 
@@ -340,14 +340,14 @@ class MessageClassifierTest {
 
 		@Test
 		void visiblyEmpty() {
-			assertTrue(Components.isVisiblyEmpty(Component.literal("§r&7  ")));
-			assertFalse(Components.isVisiblyEmpty(Component.literal("&7x")));
+			assertTrue(Components.isVisiblyEmpty(com.ddev14.yapchat.compat.Texts.literal("§r&7  ")));
+			assertFalse(Components.isVisiblyEmpty(com.ddev14.yapchat.compat.Texts.literal("&7x")));
 		}
 
 		@Test
 		void sliceKeepsStyles() {
-			Component c = Component.literal("abc").withStyle(ChatFormatting.RED)
-					.append(Component.literal("def").withStyle(ChatFormatting.BLUE));
+			Component c = com.ddev14.yapchat.compat.Texts.literal("abc").withStyle(ChatFormatting.RED)
+					.append(com.ddev14.yapchat.compat.Texts.literal("def").withStyle(ChatFormatting.BLUE));
 			Component s = Components.sliceFrom(c, 2);
 			assertEquals("cdef", s.getString());
 		}

@@ -7,9 +7,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.sounds.SoundEvents;
 
 import java.util.UUID;
@@ -28,25 +26,6 @@ public final class MessageIngest {
 	 * to its own chat (mod disabled). The ChatComponent hook then skips it instead of storing it twice.
 	 */
 	private static boolean vanillaAddsCapturedSystemMessage;
-
-	/** Fabric {@code ALLOW_CHAT}: player chat packets, including vanilla /msg and /teammsg. */
-	public static boolean onPlayerChat(YapChatHud hud, Component message, PlayerChatMessage signed,
-			GameProfile sender, ChatType.Bound params) {
-		String chatTypeId = params == null ? null
-				: com.ddev14.yapchat.compat.Compat.chatTypeId(params);
-		Component body = null;
-		if (signed != null) {
-			body = com.ddev14.yapchat.compat.Compat.chatBody(signed);
-		}
-		IncomingMessage in = new IncomingMessage(message, Source.PLAYER_CHAT, chatTypeId,
-				params != null ? params.name() : null,
-				params != null ? com.ddev14.yapchat.compat.Compat.chatTarget(params) : null,
-				sender != null ? com.ddev14.yapchat.compat.Compat.uuid(sender) : null,
-				sender != null ? com.ddev14.yapchat.compat.Compat.name(sender) : null,
-				body, false);
-		store(hud, classify(hud, in));
-		return !hud.isEnabled();
-	}
 
 	/** Fabric {@code ALLOW_GAME}: server system messages and action bar text. */
 	public static boolean onGameMessage(YapChatHud hud, Component message, boolean overlay) {

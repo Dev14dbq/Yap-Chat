@@ -119,7 +119,7 @@ public final class Popovers {
 					s -> s.matches("#?[0-9a-fA-F]{0,6}"),
 					s -> { if (s.matches("#?[0-9a-fA-F]{6}")) set.accept(normalize(s)); },
 					s -> { if (s.matches("#?[0-9a-fA-F]{6}")) { set.accept(normalize(s)); closed = true; } },
-					Component.literal("#RRGGBB"));
+					com.ddev14.yapchat.compat.Texts.literal("#RRGGBB"));
 			children.add(hex);
 		}
 
@@ -194,7 +194,7 @@ public final class Popovers {
 			this.set = set;
 			this.search = new Controls.TextInput(w - 16, "", 40, s -> true, s -> refresh(),
 					s -> { if (!results.isEmpty()) pick(results.get(0)); },
-					Component.translatable("yapchat.ui.item.search"));
+					com.ddev14.yapchat.compat.Texts.translatable("yapchat.ui.item.search"));
 			children.add(search);
 			refresh();
 		}
@@ -253,7 +253,7 @@ public final class Popovers {
 				if (hover) hoveredId = id;
 			}
 			if (results.isEmpty()) {
-				g.text(font, Component.translatable("yapchat.ui.item.none"), x + 8, y + 40, Theme.TEXT_FAINT, false);
+				g.text(font, com.ddev14.yapchat.compat.Texts.translatable("yapchat.ui.item.none"), x + 8, y + 40, Theme.TEXT_FAINT, false);
 			}
 			String footer = pages() > 1 ? "‹ " + (page + 1) + "/" + pages() + " ›" : "";
 			if (!footer.isEmpty()) g.text(font, footer, x + w - 8 - font.width(footer), y + h - 13, Theme.TEXT_DIM, false);

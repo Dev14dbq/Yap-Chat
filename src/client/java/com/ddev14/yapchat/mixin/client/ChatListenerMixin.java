@@ -2,41 +2,25 @@ package com.ddev14.yapchat.mixin.client;
 
 import com.ddev14.yapchat.YapChatModClient;
 import com.ddev14.yapchat.pipeline.MessageIngest;
-import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.client.multiplayer.chat.ChatListener;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.PlayerChatMessage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.time.Instant;
+import java.util.UUID;
 
 /**
- * Incoming chat. Fabric API for 1.19.2 has no client message events, so the same places
- * Fabric hooks on newer versions are hooked here: system messages, player chat and
- * server-sent player chat without a sender (e.g. /say from the console).
+ * Incoming chat. Before 1.19 every server message (player chat included) arrives here as one
+ * component; the classifier tells player chat, whispers and system text apart by their
+ * translation keys and formats.
  */
-@Mixin(ChatListener.class)
+@Mixin(Gui.class)
 public class ChatListenerMixin {
-	@Inject(method = "handleSystemMessage", at = @At("HEAD"), cancellable = true)
-	private void yapchat$system(Component message, boolean overlay, CallbackInfo ci) {
-		if (!MessageIngest.onGameMessage(YapChatModClient.getHud(), message, overlay)) ci.cancel();
-	}
-
-	@Inject(method = "showMessageToPlayer", at = @At("HEAD"), cancellable = true)
-	private void yapchat$player(ChatType.Bound bound, PlayerChatMessage signed, Component decorated, PlayerInfo sender,
-			boolean onlyShowSecureChat, Instant received, CallbackInfoReturnable<Boolean> cir) {
-		if (!MessageIngest.onPlayerChat(YapChatModClient.getHud(), decorated, signed,
-				sender != null ? sender.getProfile() : null, bound)) cir.setReturnValue(true);
-	}
-
-	@Inject(method = "processNonPlayerChatMessage", at = @At("HEAD"), cancellable = true)
-	private void yapchat$nonPlayer(ChatType.Bound bound, PlayerChatMessage signed, Component decorated,
-			CallbackInfoReturnable<Boolean> cir) {
-		if (!MessageIngest.onPlayerChat(YapChatModClient.getHud(), decorated, signed, null, bound)) cir.setReturnValue(true);
+	@Inject(method = "handleChat", at = @At("HEAD"), cancellable = true)
+	private void yapchat$chat(ChatType type, Component message, UUID sender, CallbackInfo ci) {
+		if (!MessageIngest.onGameMessage(YapChatModClient.getHud(), message, type == ChatType.GAME_INFO)) ci.cancel();
 	}
 }

@@ -159,7 +159,7 @@ public final class ChatHudSceneRenderer {
 
 	private static ChatMessageEntry createCollapsedEntry(int collapsedCount) {
 		if (collapsedCount <= 0) return null;
-		MutableComponent msg = Component.translatable("yapchat.chat.more_messages", collapsedCount)
+		MutableComponent msg = com.ddev14.yapchat.compat.Texts.translatable("yapchat.chat.more_messages", collapsedCount)
 				.withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY));
 		ChatMessageEntry entry = new ChatMessageEntry(msg, null, null, com.ddev14.yapchat.chat.MessageType.SYSTEM, null);
 		entry.isCollapsed = true;
