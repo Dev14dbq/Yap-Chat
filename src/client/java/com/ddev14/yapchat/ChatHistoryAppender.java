@@ -124,7 +124,7 @@ public final class ChatHistoryAppender {
 
 	private static boolean sameSender(PlayerInfo a, PlayerInfo b) {
 		if (a == null && b == null) return true;
-		if (a != null && b != null) return a.getProfile().id().equals(b.getProfile().id());
+		if (a != null && b != null) return com.ddev14.yapchat.compat.Compat.uuid(a.getProfile()).equals(com.ddev14.yapchat.compat.Compat.uuid(b.getProfile()));
 		return false;
 	}
 

@@ -21,7 +21,7 @@ public final class ChatHudClickDispatch {
 
 	public static boolean handleMessageClick(YapChatHud hud, double mouseX, double mouseY) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (!(minecraft.gui.screen() instanceof ChatScreen)) {
+		if (!(com.ddev14.yapchat.compat.Compat.screen() instanceof ChatScreen)) {
 			return false;
 		}
 
@@ -120,7 +120,7 @@ public final class ChatHudClickDispatch {
 				minecraft.player.connection.sendCommand(cmd);
 			}
 		} else if (clickEvent instanceof ClickEvent.SuggestCommand suggest) {
-			if (minecraft.gui.screen() instanceof ChatScreen chatScreen) {
+			if (com.ddev14.yapchat.compat.Compat.screen() instanceof ChatScreen chatScreen) {
 				String cmd = suggest.command();
 				if (!cmd.startsWith("/")) cmd = "/" + cmd;
 				chatScreen.handleChatInput(cmd, true);

@@ -39,7 +39,7 @@ public final class MojangSkinCache {
 			return;
 		}
 
-		Thread.ofVirtual().start(() -> {
+		Thread loader = new Thread(() -> {
 			try {
 				UUID uuid = UUID_CACHE.get(playerName);
 				if (uuid == null) {
@@ -102,6 +102,8 @@ public final class MojangSkinCache {
 			} finally {
 				LOADING_FLAGS.remove(playerName);
 			}
-		});
+		}, "yap-chat skin lookup");
+		loader.setDaemon(true);
+		loader.start();
 	}
 }

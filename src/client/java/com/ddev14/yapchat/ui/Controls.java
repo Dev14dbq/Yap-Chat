@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -58,7 +58,7 @@ public final class Controls {
 		}
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			float target = get.getAsBoolean() ? 1f : 0f;
 			anim += (target - anim) * 0.35f;
 			if (Math.abs(target - anim) < 0.01f) anim = target;
@@ -118,7 +118,7 @@ public final class Controls {
 		private int trackW() { return w - valueW; }
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			int value = get.getAsInt();
 			float t = (value - min) / (float) (max - min);
 			int tx = trackX(), tw = trackW();
@@ -188,7 +188,7 @@ public final class Controls {
 		}
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			boolean hover = isHovered(mx, my);
 			Theme.framed(g, x, y, w, h, hover ? Theme.CONTROL_HOVER : Theme.CONTROL, Theme.CONTROL_EDGE);
 			boolean left = hover && mx < x + w / 2;
@@ -241,7 +241,7 @@ public final class Controls {
 		}
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			boolean hover = isHovered(mx, my) && enabled;
 			int textColor;
 			switch (kind) {
@@ -286,7 +286,7 @@ public final class Controls {
 		}
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			boolean hover = isHovered(mx, my) && enabled;
 			if (hover) Theme.box(g, x, y, w, h, Theme.CONTROL_HOVER);
 			int color = !enabled ? Theme.TEXT_FAINT : hover ? Theme.ACCENT_HOVER : Theme.TEXT_DIM;
@@ -308,7 +308,7 @@ public final class Controls {
 				"..###..",
 		};
 
-		private static void drawBitmap(GuiGraphicsExtractor g, String[] rows, int x, int y, int color) {
+		private static void drawBitmap(Gfx g, String[] rows, int x, int y, int color) {
 			for (int r = 0; r < rows.length; r++)
 				for (int c = 0; c < rows[r].length(); c++)
 					if (rows[r].charAt(c) == '#') g.fill(x + c, y + r, x + c + 1, y + r + 1, color);
@@ -350,7 +350,7 @@ public final class Controls {
 		public void setValue(String v) { value = v == null ? "" : v; }
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			boolean hover = isHovered(mx, my);
 			Theme.framed(g, x, y, w, h, Theme.CONTROL, focused ? Theme.ACCENT : hover ? Theme.TEXT_FAINT : Theme.CONTROL_EDGE);
 			int inner = w - 8;
@@ -462,7 +462,7 @@ public final class Controls {
 		}
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			Theme.framed(g, x, y, w, h, 0xFF0C0C0C, isHovered(mx, my) ? Theme.TEXT_FAINT : Theme.CONTROL_EDGE);
 			// hotbar
 			Theme.box(g, x + (w - 30) / 2, y + h - 6, 30, 3, 0xFF3A3A3A);
@@ -511,7 +511,7 @@ public final class Controls {
 		}
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			boolean hover = isHovered(mx, my);
 			Theme.box(g, x, y, w, h, hover ? Theme.ACCENT_HOVER : Theme.CONTROL_EDGE);
 			g.fill(x + 2, y + 2, x + w - 2, y + h - 2, parse(hex.get(), 0xFF000000));
@@ -539,7 +539,7 @@ public final class Controls {
 		}
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			boolean hover = isHovered(mx, my) && enabled;
 			Theme.framed(g, x, y, w, h, hover ? Theme.CONTROL_HOVER : Theme.CONTROL, hover ? Theme.ACCENT_HOVER : Theme.CONTROL_EDGE);
 			if (enabled) ItemIcons.draw(g, itemOf(id.get(), fallback), x + 1, y + 1);

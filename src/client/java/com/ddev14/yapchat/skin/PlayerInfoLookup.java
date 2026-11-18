@@ -38,7 +38,7 @@ public final class PlayerInfoLookup {
 		}
 
 		for (PlayerInfo playerInfo : connection.getOnlinePlayers()) {
-			String profileName = playerInfo.getProfile().name();
+			String profileName = com.ddev14.yapchat.compat.Compat.name(playerInfo.getProfile());
 			if (profileName != null) {
 				String cleanProfileName = profileName.replaceAll("(?i)[§&][0-9A-FK-OR]", "").trim();
 				if (profileName.equalsIgnoreCase(playerName) ||

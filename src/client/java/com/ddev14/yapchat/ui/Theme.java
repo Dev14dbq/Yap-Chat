@@ -1,6 +1,6 @@
 package com.ddev14.yapchat.ui;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import com.ddev14.yapchat.compat.Gfx;
 
 /** Colors and drawing helpers of the Yap Chat settings UI (red, matching the mod icon). */
 public final class Theme {
@@ -38,12 +38,12 @@ public final class Theme {
 	public static final int SHADOW       = 0x50000000;
 
 	/** Filled rectangle (square corners, like vanilla and Sodium). */
-	public static void box(GuiGraphicsExtractor g, int x, int y, int w, int h, int color) {
+	public static void box(Gfx g, int x, int y, int w, int h, int color) {
 		g.fill(x, y, x + w, y + h, color);
 	}
 
 	/** Box with a 1px border in another color. */
-	public static void framed(GuiGraphicsExtractor g, int x, int y, int w, int h, int fill, int edge) {
+	public static void framed(Gfx g, int x, int y, int w, int h, int fill, int edge) {
 		box(g, x, y, w, h, edge);
 		box(g, x + 1, y + 1, w - 2, h - 2, fill);
 	}

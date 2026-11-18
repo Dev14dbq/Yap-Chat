@@ -24,18 +24,13 @@ public abstract class ChatComponentMixin {
 		YapChatModClient.getHud().clearChat();
 	}
 	
-	/** Client-side messages (other mods, screenshots, debug keys). */
-	@Inject(method = "addClientSystemMessage", at = @At("HEAD"), cancellable = true)
-	private void yapchat$onAddClientSystemMessage(Component message, CallbackInfo ci) {
-		if (MessageIngest.onClientSystemMessage(YapChatModClient.getHud(), message)) {
-			ci.cancel();
-		}
-	}
-
-	/** Server system messages that reach the chat without Fabric's ALLOW_GAME event. */
-	@Inject(method = "addServerSystemMessage", at = @At("HEAD"), cancellable = true)
-	private void yapchat$onAddServerSystemMessage(Component message, CallbackInfo ci) {
-		if (MessageIngest.onServerSystemMessage(YapChatModClient.getHud(), message)) {
+	/**
+	 * System and client-side messages (server messages that skipped Fabric's ALLOW_GAME event,
+	 * other mods, screenshots, debug keys). Player chat uses the three-argument overload.
+	 */
+	@Inject(method = "addMessage(Lnet/minecraft/network/chat/Component;)V", at = @At("HEAD"), cancellable = true)
+	private void yapchat$onAddMessage(Component message, CallbackInfo ci) {
+		if (MessageIngest.onVanillaAddMessage(YapChatModClient.getHud(), message)) {
 			ci.cancel();
 		}
 	}

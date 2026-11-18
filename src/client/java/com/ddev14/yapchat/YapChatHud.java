@@ -8,7 +8,7 @@ import com.ddev14.yapchat.skin.PlayerSkinUpdater;
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -148,7 +148,7 @@ public class YapChatHud {
 	 */
 	public void handleMouseScroll(double delta) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.gui.screen() instanceof ChatScreen) {
+		if (com.ddev14.yapchat.compat.Compat.screen() instanceof ChatScreen) {
 			// Прокрутка вверх (delta > 0) - показываем более старые сообщения
 			// Прокрутка вниз (delta < 0) - показываем более новые сообщения
 			if (delta > 0) {
@@ -159,7 +159,7 @@ public class YapChatHud {
 		}
 	}
 
-	public void onHudRender(GuiGraphicsExtractor guiGraphics) {
+	public void onHudRender(Gfx guiGraphics) {
 		// Показываем чат только если он включен
 		// Но сообщения продолжают сохраняться даже когда чат выключен
 		if (!enabled) {
@@ -177,11 +177,11 @@ public class YapChatHud {
 		// Всегда рисуем наш HUD (ранее проверяли конфиг)
 		
 		// Проверяем, открыт ли чат
-		boolean chatOpen = minecraft.gui.screen() instanceof ChatScreen;
+		boolean chatOpen = com.ddev14.yapchat.compat.Compat.screen() instanceof ChatScreen;
 		
 		if (chatOpen) {
 			ChatHudSceneRenderer.renderOpenHistory(this, guiGraphics, minecraft);
-			if (minecraft.gui.screen() != null) {
+			if (com.ddev14.yapchat.compat.Compat.screen() != null) {
 				double mouseX = minecraft.mouseHandler.xpos();
 				double mouseY = minecraft.mouseHandler.ypos();
 				renderTooltip(guiGraphics, (int)mouseX, (int)mouseY);
@@ -247,8 +247,8 @@ public class YapChatHud {
 	/**
 	 * Рендерит tooltip для сообщения о достижении при наведении
 	 */
-	public void renderTooltip(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
-		// Tooltip будет реализован позже, когда найдем правильный API для GuiGraphicsExtractor
+	public void renderTooltip(Gfx guiGraphics, int mouseX, int mouseY) {
+		// Tooltip будет реализован позже, когда найдем правильный API для Gfx
 		// Пока фокусируемся на том, чтобы клик открывал экран достижений
 	}
 	
@@ -308,12 +308,12 @@ public class YapChatHud {
 	 */
 	private void clearVanillaChat() {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft == null || minecraft.gui == null || minecraft.gui.hud == null || minecraft.gui.hud.getChat() == null) {
+		if (minecraft == null || com.ddev14.yapchat.compat.Compat.chat() == null) {
 			return;
 		}
 		
 		// Очищаем стандартный чат (сообщения уже сохранены в нашем HUD)
-		minecraft.gui.hud.getChat().clearMessages(false);
+		com.ddev14.yapchat.compat.Compat.chat().clearMessages(false);
 	}
 	
 	/**

@@ -12,7 +12,6 @@ import com.ddev14.yapchat.mixin.client.OptionInstanceAccessor;
 import com.ddev14.yapchat.mixin.client.TooltipAccessor;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import com.ddev14.yapchat.chat.ChatMessageEntry;
 import com.ddev14.yapchat.chat.MessageBounds;
@@ -36,15 +35,15 @@ import com.ddev14.yapchat.ui.Popovers.Popover;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
+import com.ddev14.yapchat.compat.Argb;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -105,12 +104,12 @@ public class YapChatSettingsScreen extends Screen {
 
 	@FunctionalInterface
 	private interface Custom {
-		void draw(GuiGraphicsExtractor g, int x, int y, int w, int h, int mx, int my);
+		void draw(Gfx g, int x, int y, int w, int h, int mx, int my);
 	}
 
 	@FunctionalInterface
 	private interface Leading {
-		void draw(GuiGraphicsExtractor g, int x, int y);
+		void draw(Gfx g, int x, int y);
 	}
 
 	/** Read-only value shown at the right of a row. */
@@ -123,13 +122,13 @@ public class YapChatSettingsScreen extends Screen {
 		}
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			String s = text.get();
 			g.text(font, s, x + w - font.width(s), y, Theme.TEXT_DIM, true);
 		}
 	}
 
-	private static final Identifier LOGO = Identifier.fromNamespaceAndPath("yap-chat", "textures/gui/logo_32.png");
+	private static final Identifier LOGO = com.ddev14.yapchat.compat.Compat.id("yap-chat", "textures/gui/logo_32.png");
 	private static final int SIDEBAR = 112, MARGIN = 8, ROW_H = 20, TAB_H = 20, BOTTOM = 30, TABS_Y = 38;
 	private static Tab lastTab = Tab.GENERAL;
 
@@ -436,10 +435,10 @@ public class YapChatSettingsScreen extends Screen {
 	}
 
 	private String localName() {
-		return minecraft.player != null ? minecraft.player.getGameProfile().name() : minecraft.getUser().getName();
+		return minecraft.player != null ? com.ddev14.yapchat.compat.Compat.name(minecraft.player.getGameProfile()) : minecraft.getUser().getName();
 	}
 
-	private void drawTypeIcon(GuiGraphicsExtractor g, MessageType type, int x, int y) {
+	private void drawTypeIcon(Gfx g, MessageType type, int x, int y) {
 		switch (type) {
 			case PLAYER_CHAT, WHISPER -> ChatHudAvatarRenderer.renderPlayerHeadByName(g, x + 1, y + 1, localName(), 1f);
 			case SCREENSHOT -> ChatHudAvatarRenderer.renderCameraIcon(g, x + 1, y + 1, 1f);
@@ -466,20 +465,18 @@ public class YapChatSettingsScreen extends Screen {
 
 
 	private void openConfigFolder() {
-		com.mojang.blaze3d.Blaze3D.openPath(hud().getConfigPath().getParent());
+		com.ddev14.yapchat.compat.Compat.openFolder(hud().getConfigPath().getParent());
 	}
 
 	@Override
 	public void onClose() {
 		minecraft.options.save();
-		minecraft.gui.setScreen(parent);
+		com.ddev14.yapchat.compat.Compat.setScreen(parent);
 	}
 
 	// ── Rendering ────────────────────────────────────────────────────────────
 
-	@Override
-	public void extractRenderState(GuiGraphicsExtractor g, int mx, int my, float delta) {
-		super.extractRenderState(g, mx, my, delta);
+	private void renderContent(Gfx g, int mx, int my) {
 		int pmx = popover != null ? -1000 : mx, pmy = popover != null ? -1000 : my;
 
 		renderSidebar(g, pmx, pmy);
@@ -505,11 +502,11 @@ public class YapChatSettingsScreen extends Screen {
 		return Tab.values()[i];
 	}
 
-	private void renderSidebar(GuiGraphicsExtractor g, int mx, int my) {
+	private void renderSidebar(Gfx g, int mx, int my) {
 		int r = ox + SIDEBAR;
 		g.fill(ox, oy, r, oy + oh, Theme.SIDEBAR);
 
-		g.blit(RenderPipelines.GUI_TEXTURED, LOGO, ox + 8, oy + 9, 0f, 0f, 16, 16, 32, 32, 32, 32, ARGB.white(1f));
+		g.blit(LOGO, ox + 8, oy + 9, 0f, 0f, 16, 16, 32, 32, 32, 32, Argb.white(1f));
 		g.text(font, Component.literal("Yap Chat"), ox + 30, oy + 9, Theme.TEXT, true);
 		String version = FabricLoader.getInstance().getModContainer("yap-chat")
 				.map(c -> c.getMetadata().getVersion().getFriendlyString()).orElse("");
@@ -533,7 +530,7 @@ public class YapChatSettingsScreen extends Screen {
 				hud().isEnabled() ? Theme.TEXT : Theme.TEXT_DIM, true);
 	}
 
-	private void renderList(GuiGraphicsExtractor g, int mx, int my) {
+	private void renderList(Gfx g, int mx, int my) {
 		boolean inList = mx >= listX && mx < listX + listW && my >= listY && my < listY + listH;
 		hoveredRow = null;
 		g.enableScissor(listX, listY, listX + listW, listY + listH);
@@ -590,7 +587,7 @@ public class YapChatSettingsScreen extends Screen {
 
 	// ── Info panel and live preview ──────────────────────────────────────────
 
-	private void renderInfo(GuiGraphicsExtractor g, int mx, int my) {
+	private void renderInfo(Gfx g, int mx, int my) {
 		int top = listY;
 		if (tabPreview != null) {
 			g.fill(infoX, top, infoX + infoW, top + tabPreviewH, Theme.ROW);
@@ -669,13 +666,13 @@ public class YapChatSettingsScreen extends Screen {
 		};
 	}
 
-	private void drawBubblePreview(GuiGraphicsExtractor g, int x, int y, int w, int h, int mx, int my) {
+	private void drawBubblePreview(Gfx g, int x, int y, int w, int h, int mx, int my) {
 		g.fill(x, y, x + w, y + h, 0x50000000);
 		int mid = x + w / 2;
 		int feet = y + h - 4, headTop = feet - 72;
 		g.enableScissor(x, y, x + w, y + h);
 		if (minecraft.player != null) {
-			InventoryScreen.extractEntityInInventoryFollowsMouse(g, mid - 30, headTop, mid + 30, feet, 36, 0.0625f,
+			com.ddev14.yapchat.compat.Compat.drawPlayer(g, mid - 30, headTop, mid + 30, feet, 36, 0.0625f,
 					mx, my, minecraft.player);
 		} else {
 			g.pose().pushMatrix();
@@ -705,7 +702,7 @@ public class YapChatSettingsScreen extends Screen {
 
 	// ── Tooltips ─────────────────────────────────────────────────────────────
 
-	private void renderTooltip(GuiGraphicsExtractor g, int mx, int my) {
+	private void renderTooltip(Gfx g, int mx, int my) {
 		UiWidget over = null;
 		for (UiWidget c : allWidgets()) {
 			if (c.visible && c.tooltip != null && c.isHovered(mx, my)) over = c;
@@ -739,10 +736,7 @@ public class YapChatSettingsScreen extends Screen {
 
 	// ── Input ────────────────────────────────────────────────────────────────
 
-	@Override
-	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		double mx = event.x(), my = event.y();
-		int button = event.button();
+	private boolean onClick(double mx, double my, int button) {
 		if (popover != null) {
 			popover.mouseClicked(mx, my, button);
 			if (popover.closed) popover = null;
@@ -757,23 +751,19 @@ public class YapChatSettingsScreen extends Screen {
 		}
 		for (UiWidget c : List.copyOf(chrome)) if (c.mouseClicked(mx, my, button)) return true;
 		for (UiWidget c : visibleListControls(my)) if (c.mouseClicked(mx, my, button)) return true;
-		return super.mouseClicked(event, doubleClick);
+		return false;
 	}
 
-	@Override
-	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
-		for (UiWidget c : allWidgets()) if (c.mouseDragged(event.x(), event.y())) return true;
-		return super.mouseDragged(event, dx, dy);
+	private boolean onDrag(double mx, double my) {
+		for (UiWidget c : allWidgets()) if (c.mouseDragged(mx, my)) return true;
+		return false;
 	}
 
-	@Override
-	public boolean mouseReleased(MouseButtonEvent event) {
+	private void onRelease() {
 		for (UiWidget c : allWidgets()) c.mouseReleased();
-		return super.mouseReleased(event);
 	}
 
-	@Override
-	public boolean mouseScrolled(double mx, double my, double h, double v) {
+	private boolean onScroll(double mx, double my, double v) {
 		if (popover != null) return popover.mouseScrolled(mx, my, v);
 		for (UiWidget c : visibleListControls(my)) if (c.mouseScrolled(mx, my, v)) return true;
 		if (mx >= listX && mx < listX + listW + 6 && my >= listY && my < listY + listH) {
@@ -781,30 +771,68 @@ public class YapChatSettingsScreen extends Screen {
 			clampScroll();
 			return true;
 		}
-		return super.mouseScrolled(mx, my, h, v);
+		return false;
 	}
 
 	private void clampScroll() {
 		scroll = Math.max(0, Math.min(scroll, Math.max(0, contentHeight - listH)));
 	}
 
-	@Override
-	public boolean keyPressed(KeyEvent event) {
+	private boolean onKey(int key, int modifiers) {
 		if (popover != null) {
-			popover.keyPressed(event.key(), event.modifiers());
+			popover.keyPressed(key, modifiers);
 			if (popover.closed) popover = null;
 			return true;
 		}
-		for (UiWidget c : allWidgets()) if (c.keyPressed(event.key(), event.modifiers())) return true;
-		return super.keyPressed(event);
+		for (UiWidget c : allWidgets()) if (c.keyPressed(key, modifiers)) return true;
+		return false;
+	}
+
+	private boolean onChar(String s) {
+		if (popover != null) return popover.charTyped(s);
+		for (UiWidget c : allWidgets()) if (c.charTyped(s)) return true;
+		return false;
+	}
+
+	// ── Screen methods (their signatures differ between Minecraft versions) ──
+
+	@Override
+	public void render(GuiGraphics raw, int mx, int my, float delta) {
+		super.render(raw, mx, my, delta);
+		Gfx g = Gfx.of(raw);
+		renderContent(g, mx, my);
+		g.flushTooltips();
+	}
+
+	@Override
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		return onClick(event.x(), event.y(), event.button()) || super.mouseClicked(event, doubleClick);
+	}
+
+	@Override
+	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+		return onDrag(event.x(), event.y()) || super.mouseDragged(event, dx, dy);
+	}
+
+	@Override
+	public boolean mouseReleased(MouseButtonEvent event) {
+		onRelease();
+		return super.mouseReleased(event);
+	}
+
+	@Override
+	public boolean mouseScrolled(double mx, double my, double h, double v) {
+		return onScroll(mx, my, v) || super.mouseScrolled(mx, my, h, v);
+	}
+
+	@Override
+	public boolean keyPressed(KeyEvent event) {
+		return onKey(event.key(), event.modifiers()) || super.keyPressed(event);
 	}
 
 	@Override
 	public boolean charTyped(CharacterEvent event) {
-		String s = event.codepointAsString();
-		if (popover != null) return popover.charTyped(s);
-		for (UiWidget c : allWidgets()) if (c.charTyped(s)) return true;
-		return super.charTyped(event);
+		return onChar(event.codepointAsString()) || super.charTyped(event);
 	}
 
 	@Override

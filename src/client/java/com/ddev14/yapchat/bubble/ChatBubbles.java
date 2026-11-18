@@ -1,20 +1,15 @@
 package com.ddev14.yapchat.bubble;
 
 import com.ddev14.yapchat.YapChatHud;
-import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
+import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.ARGB;
+import com.ddev14.yapchat.compat.Argb;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
-import org.joml.Vector4f;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -45,7 +40,7 @@ public final class ChatBubbles {
 		Minecraft mc = Minecraft.getInstance();
 		if (id == null && name != null && mc.level != null) {
 			for (Player p : mc.level.players()) {
-				if (p.getGameProfile().name().equalsIgnoreCase(name)) {
+				if (com.ddev14.yapchat.compat.Compat.name(p.getGameProfile()).equalsIgnoreCase(name)) {
 					id = p.getUUID();
 					break;
 				}
@@ -63,7 +58,7 @@ public final class ChatBubbles {
 
 	private record Placed(float x, float y, float scale, double dist, Deque<Bubble> bubbles) {}
 
-	public static void render(YapChatHud hud, GuiGraphicsExtractor g, DeltaTracker delta) {
+	public static void render(YapChatHud hud, Gfx g, float pt) {
 		Minecraft mc = Minecraft.getInstance();
 		long now = System.currentTimeMillis();
 		long life = hud.getBubbleSeconds() * 1000L;
@@ -72,10 +67,6 @@ public final class ChatBubbles {
 		if (BUBBLES.isEmpty() || !hud.isEnabled() || !hud.isBubblesEnabled()) return;
 		if (mc.level == null || mc.player == null) return; // HUD layers are skipped anyway when the GUI is hidden (F1)
 
-		Camera cam = mc.gameRenderer.mainCamera();
-		Matrix4f viewProj = cam.getViewRotationProjectionMatrix(new Matrix4f());
-		Vec3 cp = cam.position();
-		float pt = delta.getGameTimeDeltaPartialTick(false);
 		int sw = g.guiWidth(), sh = g.guiHeight();
 
 		List<Placed> placed = new ArrayList<>();
@@ -86,13 +77,12 @@ public final class ChatBubbles {
 			if (self && (!hud.isBubblesShowOwn() || mc.options.getCameraType().isFirstPerson())) continue;
 			if (!self && p.isInvisibleTo(mc.player)) continue;
 			Vec3 head = p.getPosition(pt).add(0, p.getBbHeight() + (self ? 0.35 : 0.75), 0);
-			double dist = head.distanceTo(cp);
+			double dist = head.distanceTo(com.ddev14.yapchat.compat.Compat.cameraPos());
 			if (dist > hud.getBubbleDistance()) continue;
 
-			Vector4f v = new Vector4f((float) (head.x - cp.x), (float) (head.y - cp.y), (float) (head.z - cp.z), 1f).mul(viewProj);
-			if (v.w < 0.05f) continue; // behind the camera
-			float x = (v.x / v.w + 1f) * 0.5f * sw;
-			float y = (1f - v.y / v.w) * 0.5f * sh;
+			float[] sp = com.ddev14.yapchat.compat.Compat.project(head, pt, sw, sh);
+			if (sp == null) continue; // behind the camera
+			float x = sp[0], y = sp[1];
 			if (x < -200 || x > sw + 200 || y < -100 || y > sh + 100) continue;
 			float scale = Mth.clamp(8f / (float) Math.max(dist, 1.0), 0.45f, 1f) * hud.getBubbleScale() / 100f;
 			placed.add(new Placed(x, y, scale, dist, e.getValue()));
@@ -109,7 +99,7 @@ public final class ChatBubbles {
 	}
 
 	/** Newest bubble at the bottom (with the tail), older ones stacked above and dimmer. */
-	private static void drawStack(GuiGraphicsExtractor g, Font font, Deque<Bubble> bubbles, long now, long life,
+	private static void drawStack(Gfx g, Font font, Deque<Bubble> bubbles, long now, long life,
 			int maxWidth, float bgOpacity, BubbleStyle style) {
 		int bottom = 0;
 		boolean first = true;
@@ -130,7 +120,7 @@ public final class ChatBubbles {
 	 *
 	 * @return the height used, tail included
 	 */
-	public static int drawBubble(GuiGraphicsExtractor g, Font font, int cx, int bottomY, Component text,
+	public static int drawBubble(Gfx g, Font font, int cx, int bottomY, Component text,
 			int maxWidth, float alpha, float bgOpacity, boolean tail, BubbleStyle style) {
 		BubbleSkins.Skin skin = BubbleSkins.get(style);
 		List<FormattedCharSequence> lines = font.split(text, maxWidth);
@@ -145,13 +135,13 @@ public final class ChatBubbles {
 
 		float op = Mth.clamp(bgOpacity, 0f, 1f);
 		float min = Mth.clamp(skin.minOpacity(), 0f, 1f);
-		int tint = ARGB.white(Mth.clamp(min + (1f - min) * op, 0.03f, 1f) * alpha);
-		g.blitSprite(RenderPipelines.GUI_TEXTURED, skin.body(), x, y, w, h, tint);
+		int tint = Argb.white(Mth.clamp(min + (1f - min) * op, 0.03f, 1f) * alpha);
+		g.blitSprite(skin.body(), x, y, w, h, tint);
 		if (hasTail) {
-			g.blitSprite(RenderPipelines.GUI_TEXTURED, skin.tailSprite(), cx - skin.tailAnchor(),
+			g.blitSprite(skin.tailSprite(), cx - skin.tailAnchor(),
 					y + h - skin.tailOverlap(), skin.tailWidth(), skin.tailHeight(), tint);
 		}
-		int textColor = ARGB.color(Math.max(8, Math.round(alpha * 255)), skin.textColor());
+		int textColor = Argb.color(Math.max(8, Math.round(alpha * 255)), skin.textColor());
 		for (int i = 0; i < lines.size(); i++) {
 			FormattedCharSequence l = lines.get(i);
 			g.text(font, l, cx - font.width(l) / 2, y + skin.padY() + i * 9, textColor, skin.textShadow());

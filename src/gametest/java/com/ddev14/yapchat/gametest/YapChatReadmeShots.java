@@ -21,17 +21,17 @@ public class YapChatReadmeShots implements FabricClientGameTest {
 		ctx.getInput().resizeWindow(1600, 900);
 		ctx.runOnClient(mc -> {
 			mc.options.guiScale().set(3);
-			mc.resizeGui();
+			mc.resizeDisplay();
 			YapChatModClient.getHud().resetSettings();
 			YapChatModClient.getHud().setDisplayTimeSeconds(60);
 		});
 
 		try (TestSingleplayerContext sp = ctx.worldBuilder().adjustSettings(ui -> ui.setAllowCommands(true)).create()) {
-			sp.getConnection().waitForChunksRender();
+			sp.getClientWorld().waitForChunksRender();
 			sp.getServer().runCommand("time set 1000");
 			sp.getServer().runCommand("weather clear");
 			sp.getServer().runCommand("gamerule show_advancement_messages true");
-			sp.getConnection().waitForClientboundPackets();
+			ctx.waitTicks(2);
 			ctx.runOnClient(mc -> {
 				mc.player.setYRot(30f);
 				mc.player.setXRot(-5f);
@@ -66,14 +66,14 @@ public class YapChatReadmeShots implements FabricClientGameTest {
 			ctx.getInput().resizeWindow(1600, 720);
 			ctx.runOnClient(mc -> {
 				mc.options.guiScale().set(2);
-				mc.resizeGui();
-				mc.gui.setScreen(new YapChatSettingsScreen(null));
+				mc.resizeDisplay();
+				mc.setScreen(new YapChatSettingsScreen(null));
 			});
 			int[] tabs = {0, 1, 2, 3, 4};
 			String[] names = {"general", "appearance", "messages", "bubbles", "minecraft"};
 			for (int i = 0; i < tabs.length; i++) {
 				final int tab = tabs[i];
-				ctx.runOnClient(mc -> ((YapChatSettingsScreen) mc.gui.screen()).showTab(tab));
+				ctx.runOnClient(mc -> ((YapChatSettingsScreen) mc.screen).showTab(tab));
 				ctx.waitTicks(10);
 				if (tab == 1 || tab == 2) waitForFullPreview(ctx);
 				ctx.takeScreenshot("readme-settings-" + names[i]);
@@ -81,18 +81,18 @@ public class YapChatReadmeShots implements FabricClientGameTest {
 			// Accent color in another color.
 			ctx.runOnClient(mc -> {
 				YapChatModClient.getHud().setAccentColor("#4A7FE8");
-				((YapChatSettingsScreen) mc.gui.screen()).showTab(5);
+				((YapChatSettingsScreen) mc.screen).showTab(5);
 			});
 			ctx.waitTicks(10);
 			ctx.takeScreenshot("readme-settings-advanced-blue");
-			ctx.runOnClient(mc -> ((YapChatSettingsScreen) mc.gui.screen()).showTab(1));
+			ctx.runOnClient(mc -> ((YapChatSettingsScreen) mc.screen).showTab(1));
 			waitForFullPreview(ctx);
 			ctx.takeScreenshot("readme-settings-appearance-blue");
 			ctx.runOnClient(mc -> {
-				mc.gui.setScreen(null);
+				mc.setScreen(null);
 				YapChatModClient.getHud().resetSettings();
 				mc.options.guiScale().set(0);
-				mc.resizeGui();
+				mc.resizeDisplay();
 			});
 		}
 	}

@@ -10,10 +10,8 @@ import com.ddev14.yapchat.chat.RuleEngine;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.TextAlignment;
+import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -59,7 +57,7 @@ public final class ChatMessageBoxPainter {
 	 * @param offsetX   дополнительный сдвиг по X (анимация)
 	 * @param offsetY   дополнительный сдвиг по Y (анимация)
 	 */
-	public static int renderSingleMessage(GuiGraphicsExtractor guiGraphics, Font font, int screenWidth, int startY,
+	public static int renderSingleMessage(Gfx guiGraphics, Font font, int screenWidth, int startY,
 			ChatMessageEntry entry, float alpha, float backgroundOpacity,
 			Map<Integer, MessageBounds> messageBounds, int chatPosition, boolean topAnchor,
 			boolean chatOpen, int boundsKey, int offsetX, int offsetY) {
@@ -140,13 +138,7 @@ public final class ChatMessageBoxPainter {
 			// Открытый чат: используем ActiveTextCollector с TOOLTIP_AND_CURSOR,
 			// чтобы движок автоматически показывал hover-эффекты (SHOW_TEXT, SHOW_ITEM,
 			// SHOW_ENTITY) и менял курсор над кликабельным текстом.
-			ActiveTextCollector renderer = guiGraphics.textRenderer(
-					GuiGraphicsExtractor.HoveredTextEffects.TOOLTIP_AND_CURSOR);
-			ActiveTextCollector.Parameters params = renderer.defaultParameters().withOpacity(alpha);
-			for (int i = 0; i < lines.size(); i++) {
-				renderer.accept(TextAlignment.LEFT, textX, textY + i * font.lineHeight,
-						params, lines.get(i));
-			}
+			guiGraphics.hoverableLines(font, lines, textX, textY, alpha);
 		} else {
 			// Закрытый HUD-оверлей: просто рисуем текст с alpha-fade, hover не нужен.
 			int textAlpha = (int) (255 * alpha);
@@ -195,7 +187,7 @@ public final class ChatMessageBoxPainter {
 	 * Icon left of the message. Order: icon from a rule → the other player's head for
 	 * player chat and whispers → the configured icon of the message type.
 	 */
-	private static void renderAvatar(GuiGraphicsExtractor g, ChatMessageEntry entry, int x, int y, float alpha) {
+	private static void renderAvatar(Gfx g, ChatMessageEntry entry, int x, int y, float alpha) {
 		YapChatHud hud = YapChatModClient.getHud();
 		if (entry.iconOverride != null) {
 			ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, entry.iconOverride, Items.STICK);
@@ -219,7 +211,7 @@ public final class ChatMessageBoxPainter {
 			case CHALLENGE     -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconChallenge() : null, Items.NETHERITE_INGOT);
 			case ACHIEVEMENT   -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconAchievement() : null, Items.EMERALD);
 			case ERROR         -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconError() : null, Items.BARRIER);
-			case SLEEP         -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconSleep() : null, Items.BED.red());
+			case SLEEP         -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconSleep() : null, Items.RED_BED);
 			case SCREENSHOT    -> ChatHudAvatarRenderer.renderCameraIcon(g, x, y, alpha);
 			case COMMAND_BLOCK -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconCommandBlock() : null, Items.COMMAND_BLOCK);
 			case WHISPER       -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconWhisper() : null, Items.PAPER);
@@ -245,7 +237,7 @@ public final class ChatMessageBoxPainter {
 	 * Who wrote to whom: author's head, an arrow, recipient's head.
 	 * Incoming: other player → you. Outgoing: you → other player.
 	 */
-	private static void renderWhisperHeads(GuiGraphicsExtractor g, Font font, ChatMessageEntry entry,
+	private static void renderWhisperHeads(Gfx g, Font font, ChatMessageEntry entry,
 			int x, int y, float alpha) {
 		renderHead(g, x, y, alpha, entry.senderInfo, entry.senderName);
 
@@ -258,7 +250,7 @@ public final class ChatMessageBoxPainter {
 		renderHead(g, receiverX, y, alpha, entry.receiverInfo, entry.receiverName);
 	}
 
-	private static void renderHead(GuiGraphicsExtractor g, int x, int y, float alpha, PlayerInfo info, String name) {
+	private static void renderHead(Gfx g, int x, int y, float alpha, PlayerInfo info, String name) {
 		if (info != null) {
 			ChatHudAvatarRenderer.renderPlayerHead(g, x, y, info, alpha);
 		} else {

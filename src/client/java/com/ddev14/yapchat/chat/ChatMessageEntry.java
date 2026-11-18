@@ -49,7 +49,7 @@ public final class ChatMessageEntry {
 		this.timestamp = now;
 		this.firstMessageTime = now;
 		if (senderInfo != null) {
-			this.senderUUID = senderInfo.getProfile().id();
+			this.senderUUID = com.ddev14.yapchat.compat.Compat.uuid(senderInfo.getProfile());
 		}
 		this.messagePattern = ChatSpamPatterns.extractMessagePattern(message.getString());
 	}
@@ -78,10 +78,10 @@ public final class ChatMessageEntry {
 	}
 
 	public void updateSenderInfo(PlayerInfo newInfo) {
-		if (newInfo != null && (senderInfo == null || senderUUID == null || senderUUID.equals(newInfo.getProfile().id()))) {
+		if (newInfo != null && (senderInfo == null || senderUUID == null || senderUUID.equals(com.ddev14.yapchat.compat.Compat.uuid(newInfo.getProfile())))) {
 			this.senderInfo = newInfo;
 			if (senderUUID == null) {
-				this.senderUUID = newInfo.getProfile().id();
+				this.senderUUID = com.ddev14.yapchat.compat.Compat.uuid(newInfo.getProfile());
 			}
 		}
 	}

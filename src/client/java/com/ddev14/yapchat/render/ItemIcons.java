@@ -1,9 +1,9 @@
 package com.ddev14.yapchat.render;
 
+import com.ddev14.yapchat.compat.Argb;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
+import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -33,7 +33,7 @@ public final class ItemIcons {
 	public static Item item(String id, Item fallback) {
 		if (id != null && !id.isBlank()) {
 			try {
-				Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(id.trim()));
+				Item item = com.ddev14.yapchat.compat.Compat.item(com.ddev14.yapchat.compat.Compat.parseId(id.trim()));
 				if (item != Items.AIR) return item;
 			} catch (Exception ignored) {
 				// invalid id: fall through
@@ -44,7 +44,7 @@ public final class ItemIcons {
 
 	/** True when a real ItemStack can be created for the item. */
 	public static boolean ready(Item item) {
-		return item.builtInRegistryHolder().areComponentsBound();
+		return true; // items have their components from the start before Minecraft 26.3
 	}
 
 	/** A stack when possible, otherwise EMPTY (never throws). */
@@ -57,23 +57,24 @@ public final class ItemIcons {
 		return Component.translatable(item.getDescriptionId());
 	}
 
-	public static void draw(GuiGraphicsExtractor g, Item item, int x, int y) {
+	public static void draw(Gfx g, Item item, int x, int y) {
 		draw(g, item, x, y, 0xFFFFFFFF);
 	}
 
-	public static void draw(GuiGraphicsExtractor g, Item item, int x, int y, int color) {
+	public static void draw(Gfx g, Item item, int x, int y, int color) {
 		if (item == null || item == Items.AIR) return;
 		if (ready(item)) {
-			g.item(new ItemStack(item), x, y, color);
+			if (Argb.alpha(color) < 8) return;
+			g.item(new ItemStack(item), x, y);
 			return;
 		}
-		flat(item).ifPresent(f -> g.blit(RenderPipelines.GUI_TEXTURED, f.texture, x, y, 0f, 0f, 16, 16,
+		flat(item).ifPresent(f -> g.blit(f.texture, x, y, 0f, 0f, 16, 16,
 				f.width, f.height, color));
 	}
 
 	private static Optional<Flat> flat(Item item) {
 		return FLAT.computeIfAbsent(item, it -> {
-			Identifier id = BuiltInRegistries.ITEM.getKey(it);
+			Identifier id = com.ddev14.yapchat.compat.Compat.itemId(it);
 			String ns = id.getNamespace(), path = id.getPath();
 			String[] candidates = {
 					"textures/item/" + path + ".png",
@@ -83,7 +84,7 @@ public final class ItemIcons {
 					"textures/block/" + path + "_top.png",
 			};
 			for (String c : candidates) {
-				Identifier tex = Identifier.fromNamespaceAndPath(ns, c);
+				Identifier tex = com.ddev14.yapchat.compat.Compat.id(ns, c);
 				Optional<Resource> res = Minecraft.getInstance().getResourceManager().getResource(tex);
 				if (res.isEmpty()) continue;
 				try (InputStream in = res.get().open(); NativeImage img = NativeImage.read(in)) {

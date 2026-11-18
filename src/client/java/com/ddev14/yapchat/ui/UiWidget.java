@@ -1,7 +1,7 @@
 package com.ddev14.yapchat.ui;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -30,7 +30,7 @@ public abstract class UiWidget {
 		return visible && mx >= x && my >= y && mx < x + w && my < y + h;
 	}
 
-	public abstract void render(GuiGraphicsExtractor g, Font font, int mx, int my);
+	public abstract void render(Gfx g, Font font, int mx, int my);
 
 	/** @return true if the click was consumed */
 	public boolean mouseClicked(double mx, double my, int button) { return false; }

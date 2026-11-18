@@ -41,8 +41,8 @@ public final class MessageIngest {
 		IncomingMessage in = new IncomingMessage(message, Source.PLAYER_CHAT, chatTypeId,
 				params != null ? params.name() : null,
 				params != null ? params.targetName().orElse(null) : null,
-				sender != null ? sender.id() : null,
-				sender != null ? sender.name() : null,
+				sender != null ? com.ddev14.yapchat.compat.Compat.uuid(sender) : null,
+				sender != null ? com.ddev14.yapchat.compat.Compat.name(sender) : null,
 				body, false);
 		store(hud, classify(hud, in));
 		return !hud.isEnabled();
@@ -91,10 +91,25 @@ public final class MessageIngest {
 
 	// ── internals ────────────────────────────────────────────────────────────
 
+	/**
+	 * {@code ChatComponent.addMessage(Component)} on versions without separate client and server
+	 * system-message methods: the event's own message on its way into vanilla chat passes, anything
+	 * else is treated as a client message.
+	 *
+	 * @return true to cancel the vanilla call
+	 */
+	public static boolean onVanillaAddMessage(YapChatHud hud, Component message) {
+		if (vanillaAddsCapturedSystemMessage) {
+			vanillaAddsCapturedSystemMessage = false;
+			return false;
+		}
+		return onClientSystemMessage(hud, message);
+	}
+
 	private static ClassifiedMessage classify(YapChatHud hud, IncomingMessage in) {
 		Minecraft mc = Minecraft.getInstance();
 		ClientPacketListener connection = mc.getConnection();
-		String localName = mc.player != null ? mc.player.getGameProfile().name() : mc.getUser().getName();
+		String localName = mc.player != null ? com.ddev14.yapchat.compat.Compat.name(mc.player.getGameProfile()) : mc.getUser().getName();
 		MessageClassifier.Context ctx = new MessageClassifier.Context(
 				localName,
 				name -> connection != null && connection.getPlayerInfoIgnoreCase(name) != null,

@@ -25,23 +25,23 @@ public class YapChatClientGameTest implements FabricClientGameTest {
 	@Override
 	public void runTest(ClientGameTestContext ctx) {
 		// Settings opened from the title screen (Mod Menu) must not crash: no world, item data not bound yet.
-		ctx.runOnClient(mc -> mc.gui.setScreen(new com.ddev14.yapchat.ui.YapChatSettingsScreen(mc.gui.screen())));
+		ctx.runOnClient(mc -> mc.setScreen(new com.ddev14.yapchat.ui.YapChatSettingsScreen(mc.screen)));
 		for (int i = 0; i < 7; i++) {
 			final int tab = i;
-			ctx.runOnClient(mc -> ((com.ddev14.yapchat.ui.YapChatSettingsScreen) mc.gui.screen()).showTab(tab));
+			ctx.runOnClient(mc -> ((com.ddev14.yapchat.ui.YapChatSettingsScreen) mc.screen).showTab(tab));
 			ctx.waitTicks(3);
 		}
-		ctx.runOnClient(mc -> ((com.ddev14.yapchat.ui.YapChatSettingsScreen) mc.gui.screen()).showTab(0));
+		ctx.runOnClient(mc -> ((com.ddev14.yapchat.ui.YapChatSettingsScreen) mc.screen).showTab(0));
 		ctx.waitTicks(3);
 		ctx.takeScreenshot("yap-chat-settings-title");
-		ctx.runOnClient(mc -> ((com.ddev14.yapchat.ui.YapChatSettingsScreen) mc.gui.screen()).onClose());
+		ctx.runOnClient(mc -> ((com.ddev14.yapchat.ui.YapChatSettingsScreen) mc.screen).onClose());
 		ctx.waitTicks(3);
 
 		try (TestSingleplayerContext sp = ctx.worldBuilder().adjustSettings(ui -> ui.setAllowCommands(true)).create()) {
-			sp.getConnection().waitForChunksRender();
+			sp.getClientWorld().waitForChunksRender();
 			String me = ctx.computeOnClient(mc -> mc.player.getGameProfile().name());
 			sp.getServer().runCommand("gamerule show_advancement_messages true");
-			sp.getConnection().waitForClientboundPackets();
+			ctx.waitTicks(2);
 			ctx.waitTicks(5);
 
 			List<Expect> cases = List.of(
@@ -76,8 +76,8 @@ public class YapChatClientGameTest implements FabricClientGameTest {
 					} else {
 						ctx.runOnClient(mc -> mc.getConnection().sendCommand(e.command()));
 					}
-					sp.getConnection().waitForServerboundPackets();
-					sp.getConnection().waitForClientboundPackets();
+					ctx.waitTicks(2);
+					ctx.waitTicks(2);
 					ctx.waitTicks(5);
 				}
 				List<ChatMessageEntry> h = history();
@@ -130,10 +130,10 @@ public class YapChatClientGameTest implements FabricClientGameTest {
 
 			// "Reset all" resets after two clicks with a real mouse.
 			ctx.runOnClient(mc -> com.ddev14.yapchat.YapChatModClient.getHud().setDisplayTimeSeconds(33));
-			ctx.runOnClient(mc -> mc.gui.setScreen(new com.ddev14.yapchat.ui.YapChatSettingsScreen(null)));
+			ctx.runOnClient(mc -> mc.setScreen(new com.ddev14.yapchat.ui.YapChatSettingsScreen(null)));
 			ctx.waitTicks(3);
 			double[] pos = ctx.computeOnClient(mc -> {
-				int[] c = ((com.ddev14.yapchat.ui.YapChatSettingsScreen) mc.gui.screen()).resetButtonCenter();
+				int[] c = ((com.ddev14.yapchat.ui.YapChatSettingsScreen) mc.screen).resetButtonCenter();
 				double sc = mc.getWindow().getGuiScale();
 				return new double[] {c[0] * sc, c[1] * sc};
 			});
@@ -146,31 +146,31 @@ public class YapChatClientGameTest implements FabricClientGameTest {
 			ctx.waitTicks(3);
 			int afterReset = ctx.computeOnClient(mc -> com.ddev14.yapchat.YapChatModClient.getHud().getDisplayTimeSeconds());
 			if (afterReset != 5) failures.add("FAIL Reset all by two clicks: show time is " + afterReset + ", expected 5");
-			ctx.runOnClient(mc -> mc.gui.setScreen(null));
+			ctx.runOnClient(mc -> mc.setScreen(null));
 
 			// Vanilla "Chat Settings" must open our screen instead.
-			ctx.runOnClient(mc -> mc.gui.setScreen(new net.minecraft.client.gui.screens.options.ChatOptionsScreen(null, mc.options)));
+			ctx.runOnClient(mc -> mc.setScreen(new net.minecraft.client.gui.screens.options.ChatOptionsScreen(null, mc.options)));
 			ctx.waitTicks(3);
-			boolean replaced = ctx.computeOnClient(mc -> mc.gui.screen() instanceof com.ddev14.yapchat.ui.YapChatSettingsScreen);
+			boolean replaced = ctx.computeOnClient(mc -> mc.screen instanceof com.ddev14.yapchat.ui.YapChatSettingsScreen);
 			if (!replaced) failures.add("FAIL vanilla Chat Settings was not replaced by the Yap Chat screen");
 			for (int i = 0; i < 7; i++) {
 				final int tab = i;
 				ctx.runOnClient(mc -> {
-					if (mc.gui.screen() instanceof com.ddev14.yapchat.ui.YapChatSettingsScreen s) s.showTab(tab);
+					if (mc.screen instanceof com.ddev14.yapchat.ui.YapChatSettingsScreen s) s.showTab(tab);
 				});
 				ctx.waitTicks(i == 1 ? 20 : 3);
 				ctx.takeScreenshot("yap-chat-settings-" + tab);
 			}
 			// Bigger GUI area: info panel next to the list.
-			ctx.runOnClient(mc -> { mc.options.guiScale().set(1); mc.resizeGui(); });
+			ctx.runOnClient(mc -> { mc.options.guiScale().set(1); mc.resizeDisplay(); });
 			for (int tab : new int[] {1, 3, 4}) {
 				ctx.runOnClient(mc -> {
-					if (mc.gui.screen() instanceof com.ddev14.yapchat.ui.YapChatSettingsScreen s) s.showTab(tab);
+					if (mc.screen instanceof com.ddev14.yapchat.ui.YapChatSettingsScreen s) s.showTab(tab);
 				});
 				ctx.waitTicks(20);
 				ctx.takeScreenshot("yap-chat-settings-wide-" + tab);
 			}
-			ctx.runOnClient(mc -> { mc.options.guiScale().set(0); mc.resizeGui(); mc.gui.setScreen(null); });
+			ctx.runOnClient(mc -> { mc.options.guiScale().set(0); mc.resizeDisplay(); mc.setScreen(null); });
 
 			if (!failures.isEmpty()) {
 				failures.forEach(LOG::error);

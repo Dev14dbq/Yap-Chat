@@ -9,7 +9,7 @@ import com.ddev14.yapchat.render.ChatMessageBoxPainter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -21,7 +21,7 @@ import net.minecraft.network.chat.Style;
 public final class ChatHudSceneRenderer {
 	private ChatHudSceneRenderer() {}
 
-	public static void renderClosedOverlay(YapChatHud hud, GuiGraphicsExtractor guiGraphics, Minecraft minecraft) {
+	public static void renderClosedOverlay(YapChatHud hud, Gfx guiGraphics, Minecraft minecraft) {
 		if (hud.messageHistory.isEmpty()) {
 			return;
 		}
@@ -68,7 +68,7 @@ public final class ChatHudSceneRenderer {
 
 	}
 
-	public static void renderOpenHistory(YapChatHud hud, GuiGraphicsExtractor guiGraphics, Minecraft minecraft) {
+	public static void renderOpenHistory(YapChatHud hud, Gfx guiGraphics, Minecraft minecraft) {
 		if (hud.messageHistory.isEmpty()) {
 			return;
 		}
@@ -140,7 +140,7 @@ public final class ChatHudSceneRenderer {
 		}
 	}
 
-	private static int renderEntry(GuiGraphicsExtractor g, Font font, int screenWidth, int currentY,
+	private static int renderEntry(Gfx g, Font font, int screenWidth, int currentY,
 			ChatMessageEntry entry, float alpha, YapChatHud hud, int chatPosition, boolean topAnchor,
 			int boundsKey) {
 		// Open chat: no animation offsets (messages are always fully visible)

@@ -11,7 +11,8 @@
 		"OptionsSubScreenAccessor",
 		"OptionInstanceAccessor",
 		"TooltipAccessor",
-		"GuiSetScreenMixin"
+		"GuiSetScreenMixin",
+		"GameRendererAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -51,7 +51,7 @@ public final class BubbleSkins implements ResourceManagerReloadListener {
 	private static Skin load(BubbleStyle style, ResourceManager manager) {
 		String key = style.name().toLowerCase(Locale.ROOT);
 		JsonObject o = new JsonObject();
-		Identifier json = Identifier.fromNamespaceAndPath("yap-chat", "bubbles/" + key + ".json");
+		Identifier json = com.ddev14.yapchat.compat.Compat.id("yap-chat", "bubbles/" + key + ".json");
 		Optional<Resource> res = manager.getResource(json);
 		if (res.isPresent()) {
 			try (Reader r = res.get().openAsReader()) {
@@ -61,8 +61,8 @@ public final class BubbleSkins implements ResourceManagerReloadListener {
 			}
 		}
 		return new Skin(
-				Identifier.fromNamespaceAndPath("yap-chat", "bubble/" + key),
-				Identifier.fromNamespaceAndPath("yap-chat", "bubble/" + key + "_tail"),
+				com.ddev14.yapchat.compat.Compat.id("yap-chat", "bubble/" + key),
+				com.ddev14.yapchat.compat.Compat.id("yap-chat", "bubble/" + key + "_tail"),
 				color(o, "text_color", 0xFFFFFF),
 				bool(o, "text_shadow", false),
 				num(o, "padding_x", 4), num(o, "padding_y", 3),

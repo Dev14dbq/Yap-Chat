@@ -2,7 +2,7 @@ package com.ddev14.yapchat.ui;
 
 import com.ddev14.yapchat.render.ItemIcons;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -43,7 +43,7 @@ public final class Popovers {
 
 		protected abstract void layout();
 
-		protected void renderPanel(GuiGraphicsExtractor g) {
+		protected void renderPanel(Gfx g) {
 			Theme.box(g, x + 2, y + 3, w, h, Theme.SHADOW);
 			Theme.framed(g, x, y, w, h, 0xF0101010, Theme.PANEL_EDGE);
 		}
@@ -137,7 +137,7 @@ public final class Popovers {
 		}
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			renderPanel(g);
 			g.text(font, title, x + 8, y + 5, Theme.TEXT_DIM, false);
 			String current = get.get();
@@ -207,9 +207,9 @@ public final class Popovers {
 			if (q.isEmpty()) {
 				for (String s : SUGGESTED) out.add("minecraft:" + s);
 			} else {
-				for (Identifier id : BuiltInRegistries.ITEM.keySet()) {
+				for (Identifier id : com.ddev14.yapchat.compat.Compat.itemIds()) {
 					String full = id.toString();
-					if (full.contains(q) && BuiltInRegistries.ITEM.getValue(id) != Items.AIR) out.add(full);
+					if (full.contains(q) && com.ddev14.yapchat.compat.Compat.item(id) != Items.AIR) out.add(full);
 				}
 				out.sort((a, b) -> {
 					boolean pa = a.substring(a.indexOf(':') + 1).startsWith(q), pb = b.substring(b.indexOf(':') + 1).startsWith(q);
@@ -237,7 +237,7 @@ public final class Popovers {
 		}
 
 		@Override
-		public void render(GuiGraphicsExtractor g, Font font, int mx, int my) {
+		public void render(Gfx g, Font font, int mx, int my) {
 			renderPanel(g);
 			g.text(font, title, x + 8, y + 5, Theme.TEXT_DIM, false);
 			search.render(g, font, mx, my);

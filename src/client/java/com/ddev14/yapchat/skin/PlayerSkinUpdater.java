@@ -38,8 +38,8 @@ public final class PlayerSkinUpdater {
 					PlayerInfo info = PlayerInfoLookup.getPlayerInfoByName(entry.senderName);
 					if (info != null) {
 						entry.updateSenderInfo(info);
-						if (entry.senderUUID == null && info.getProfile().id() != null) {
-							entry.senderUUID = info.getProfile().id();
+						if (entry.senderUUID == null && com.ddev14.yapchat.compat.Compat.uuid(info.getProfile()) != null) {
+							entry.senderUUID = com.ddev14.yapchat.compat.Compat.uuid(info.getProfile());
 						}
 					} else {
 						MojangSkinCache.requestSkinLoad(entry.senderName);
