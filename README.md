@@ -33,6 +33,20 @@ Private message support. Displayed with special formatting showing sender/receiv
 
 ![whisper](https://cdn.modrinth.com/data/cached_images/641eb308fb5e29f57348cd5046408aeffec1fa23.png)
 
+### Server Message Formats
+
+KKS Chat recognises message types from what the game actually reports (chat type, translation keys), so it works the same in every language. For plugin formats it ships patterns for EssentialsX/CMI (`[Steve -> me] hi`), Hypixel-style (`From [VIP] Steve: hi`) and common chat layouts (`[Rank] Steve » hi`).
+
+If your server uses its own format, add it to `config/kks-chat.json`:
+
+```json
+"serverPatterns": [
+  { "id": "my-server-pm", "regex": "^✉ (?<from>\\w+) » (?<to>\\w+): (?<body>.*)$", "type": "WHISPER" }
+]
+```
+
+Named groups: `from` / `to` (private messages; `me`, `я` or your nick mean you), `name` (chat author, must be online), `body` (the message).
+
 ---
 
 ## Settings
