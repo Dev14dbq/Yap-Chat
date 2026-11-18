@@ -24,5 +24,7 @@
   "kkschat.time.night": "밤",
   "kkschat.time.midnight": "자정",
   "kkschat.time.sunrise": "일출",
-  "kkschat.time.dawn": "새벽"
+  "kkschat.time.dawn": "새벽",
+  "kkschat.whisper.from": "[%s]님의 귓속말:",
+  "kkschat.whisper.to": "[%s]님에게 귓속말:"
 }

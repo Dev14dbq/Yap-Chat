@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "kks-chat-gametest",
+	"version": "1.0.0",
+	"name": "KKS Chat in-game tests",
+	"environment": "client",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"com.ddev14.kkschat.gametest.KksChatClientGameTest"
+		]
+	},
+	"depends": {
+		"kks-chat": "*"
+	}
+}

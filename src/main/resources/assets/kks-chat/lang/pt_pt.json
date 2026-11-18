@@ -24,5 +24,7 @@
   "kkschat.time.night": "Noite",
   "kkschat.time.midnight": "Meia-noite",
   "kkschat.time.sunrise": "Nascer do sol",
-  "kkschat.time.dawn": "Aurora"
+  "kkschat.time.dawn": "Aurora",
+  "kkschat.whisper.from": "Sussurro de [%s]:",
+  "kkschat.whisper.to": "Sussurro para [%s]:"
 }

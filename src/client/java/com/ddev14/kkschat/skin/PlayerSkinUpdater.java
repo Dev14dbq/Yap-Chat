@@ -31,7 +31,6 @@ public final class PlayerSkinUpdater {
 					PlayerInfo info = connection.getPlayerInfo(entry.senderUUID);
 					if (info != null) {
 						entry.updateSenderInfo(info);
-						continue;
 					}
 				}
 
@@ -55,13 +54,9 @@ public final class PlayerSkinUpdater {
 				}
 			}
 
-			if (entry.isWhisper() && entry.receiverInfo == null) {
-				if (minecraft.player != null) {
-					PlayerInfo receiverInfo = connection.getPlayerInfo(minecraft.player.getUUID());
-					if (receiverInfo != null) {
-						entry.receiverInfo = receiverInfo;
-					}
-				}
+			// Outgoing whispers show the recipient's head: resolve it once they appear in the tab list.
+			if (entry.receiverInfo == null && entry.receiverName != null && !entry.receiverName.isEmpty()) {
+				entry.receiverInfo = PlayerInfoLookup.getPlayerInfoByName(entry.receiverName);
 			}
 		}
 	}

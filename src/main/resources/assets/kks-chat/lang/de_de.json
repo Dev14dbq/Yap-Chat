@@ -24,5 +24,7 @@
   "kkschat.time.night": "Nacht",
   "kkschat.time.midnight": "Mitternacht",
   "kkschat.time.sunrise": "Sonnenaufgang",
-  "kkschat.time.dawn": "Morgengrauen"
+  "kkschat.time.dawn": "Morgengrauen",
+  "kkschat.whisper.from": "Flüstern von [%s]:",
+  "kkschat.whisper.to": "Flüstern an [%s]:"
 }

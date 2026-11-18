@@ -13,6 +13,10 @@ public final class ChatMessageEntry {
 	public Component message;
 	public PlayerInfo senderInfo;
 	public PlayerInfo receiverInfo;
+	/** Recipient of an outgoing whisper (profile name); null otherwise. */
+	public String receiverName;
+	/** Whisper direction relative to the local player. */
+	public com.ddev14.kkschat.pipeline.Direction direction = com.ddev14.kkschat.pipeline.Direction.NONE;
 	public MessageType type;
 	public long timestamp;
 	public long firstMessageTime;
