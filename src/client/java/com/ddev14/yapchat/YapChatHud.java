@@ -129,6 +129,15 @@ public class YapChatHud {
 		return List.copyOf(messageHistory);
 	}
 
+	/** Where the newest message's text was drawn last frame, or null (used by tests). */
+	public MessageBounds lastMessageBounds() {
+		int last = messageHistory.size() - 1;
+		for (MessageBounds b : messageBounds.values()) {
+			if (b.historyIndex == last && b.component != null) return b;
+		}
+		return null;
+	}
+
 	public List<com.ddev14.yapchat.pipeline.ServerPattern> getServerPatterns() {
 		return serverPatterns;
 	}
@@ -166,6 +175,10 @@ public class YapChatHud {
 			return;
 		}
 		Minecraft minecraft = Minecraft.getInstance();
+		// Vanilla "Chat: Hidden" hides the whole chat, ours too.
+		if (minecraft.options.chatVisibility == net.minecraft.world.entity.player.ChatVisiblity.HIDDEN) {
+			return;
+		}
 		if (minecraft.level == null || minecraft.player == null) {
 			return;
 		}

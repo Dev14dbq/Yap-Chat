@@ -21,6 +21,12 @@ import java.util.UUID;
 public class ChatListenerMixin {
 	@Inject(method = "handleChat", at = @At("HEAD"), cancellable = true)
 	private void yapchat$chat(ChatType type, Component message, UUID sender, CallbackInfo ci) {
+		// Vanilla "Chat: Commands Only / Hidden": player chat is not shown (no bubble either).
+		if (type == ChatType.CHAT && net.minecraft.client.Minecraft.getInstance().options.chatVisibility
+				!= net.minecraft.world.entity.player.ChatVisiblity.FULL) {
+			ci.cancel();
+			return;
+		}
 		if (!MessageIngest.onGameMessage(YapChatModClient.getHud(), message, type == ChatType.GAME_INFO)) ci.cancel();
 	}
 }

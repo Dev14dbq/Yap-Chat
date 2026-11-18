@@ -2,9 +2,11 @@ package com.ddev14.yapchat.mixin.client;
 
 import com.ddev14.yapchat.YapChatHud;
 import com.ddev14.yapchat.YapChatModClient;
+import com.ddev14.yapchat.ChatHudClickDispatch;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -43,6 +45,21 @@ public abstract class ChatScreenMixin extends Screen {
 		}
 	}
 	
+	/** Hover text of the message under the mouse (item stats, player info, hints from the server). */
+	@Inject(at = @At("TAIL"), method = "render")
+	private void yapchat$hoverTooltip(com.mojang.blaze3d.vertex.PoseStack pose, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+		YapChatHud hud = YapChatModClient.getHud();
+		if (hud == null) return;
+		Style style = ChatHudClickDispatch.styleUnderMouse(hud, mouseX, mouseY);
+		if (style == null || style.getHoverEvent() == null) return;
+		try {
+			// vanilla draws text, item and (with advanced tooltips) entity hovers
+			this.renderComponentHoverEffect(pose, style, mouseX, mouseY);
+		} catch (RuntimeException ignored) {
+			// a broken item from the server must not crash the chat screen
+		}
+	}
+
 	@Inject(at = @At("HEAD"), method = "removed")
 	private void onChatClose(CallbackInfo ci) {
 		// Сворачиваем развернутые сообщения при закрытии чата
