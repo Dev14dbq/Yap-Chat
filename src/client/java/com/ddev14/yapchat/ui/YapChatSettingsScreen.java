@@ -363,16 +363,15 @@ public class YapChatSettingsScreen extends Screen {
 		Object values = o.values();
 		if (o.get() instanceof Boolean) {
 			control = new Toggle(() -> (Boolean) o.get(), v -> o.set(v));
-		} else if (VanillaValues.method(values, "toSliderValue") != null) {
-			// slider value sets (the interfaces are not public on every Minecraft version, hence reflection)
+		} else if (values instanceof OptionInstance.SliderableValueSet<?> raw0) {
+			OptionInstance.SliderableValueSet<Object> sv = (OptionInstance.SliderableValueSet<Object>) raw0;
 			control = new Slider(0, 1000, 1,
-					() -> (int) Math.round((double) VanillaValues.call(values, "toSliderValue", o.get()) * 1000),
-					v -> o.set(VanillaValues.call(values, "fromSliderValue", v / 1000.0)),
+					() -> (int) Math.round(sv.toSliderValue(o.get()) * 1000),
+					v -> o.set(sv.fromSliderValue(v / 1000.0)),
 					v -> valueText(label.apply(o.get()), caption).getString());
 			((Slider) control).reserveValue(64); // vanilla labels like "5.0 seconds"
-		} else if (VanillaValues.method(values, "valueListSupplier") != null) {
-			Object supplier = VanillaValues.call(values, "valueListSupplier");
-			List<Object> list = (List<Object>) VanillaValues.call(supplier, "getSelectedList");
+		} else if (values instanceof OptionInstance.CycleableValueSet<?> cv) {
+			List<Object> list = (List<Object>) cv.valueListSupplier().getSelectedList();
 			control = new Choice<Object>(list, o::get, o::set, v -> valueText(label.apply(v), caption));
 		} else {
 			return null;

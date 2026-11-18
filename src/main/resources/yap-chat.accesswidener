@@ -1,0 +1,5 @@
+accessWidener v2 named
+# Vanilla option value sets are package-private; the Minecraft tab of the settings screen uses them.
+accessible class net/minecraft/client/OptionInstance$ValueSet
+accessible class net/minecraft/client/OptionInstance$SliderableValueSet
+accessible class net/minecraft/client/OptionInstance$CycleableValueSet
