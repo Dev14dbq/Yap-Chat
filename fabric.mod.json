@@ -1,35 +1,36 @@
 {
 	"schemaVersion": 1,
-	"id": "kks-chat",
+	"id": "yap-chat",
 	"version": "1.2.6",
-	"name": "KKS Chat",
-	"description": "A modern chat replacement with a clean UI and support for interactive messages.",
+	"name": "Yap Chat",
+	"description": "A modern chat replacement: styled message boxes with icons and heads, chat bubbles above players and a full settings screen.",
 	"authors": [
 		"Softfoxxy",
 		"DDev14"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/Dev14dbq/KKS-Chat"
+		"homepage": "https://modrinth.com/mod/yap-chat",
+		"sources": "https://github.com/Dev14dbq/Yap-Chat",
+		"issues": "https://github.com/Dev14dbq/Yap-Chat/issues"
 	},
 	"license": "GPL-3.0-only",
-	"icon": "assets/kks-chat/logo.png",
+	"icon": "assets/yap-chat/logo.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.ddev14.kkschat.KksChatMod"
+			"com.ddev14.yapchat.YapChatMod"
 		],
 		"client": [
-			"com.ddev14.kkschat.KksChatModClient"
+			"com.ddev14.yapchat.YapChatModClient"
 		],
 		"modmenu": [
-			"com.ddev14.kkschat.ModMenuIntegration"
+			"com.ddev14.yapchat.ModMenuIntegration"
 		]
 	},
 	"mixins": [
-		"modid.mixins.json",
+		"yap-chat.mixins.json",
 		{
-			"config": "modid.client.mixins.json",
+			"config": "yap-chat.client.mixins.json",
 			"environment": "client"
 		}
 	],

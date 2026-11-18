@@ -1,0 +1,12 @@
+{
+  "text_color": "#FFFFFF",
+  "text_shadow": true,
+  "padding_x": 4,
+  "padding_y": 3,
+  "min_opacity": 0.5,
+  "tail": true,
+  "tail_width": 6,
+  "tail_height": 3,
+  "tail_anchor": 3,
+  "tail_overlap": 0
+}

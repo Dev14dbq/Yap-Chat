@@ -1,0 +1,19 @@
+{
+	"required": true,
+	"package": "com.ddev14.yapchat.mixin.client",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"YapChatClientMixin",
+		"ChatScreenMixin",
+		"ChatComponentMixin",
+		"MinecraftMixin",
+		"ChatOptionsScreenAccessor",
+		"OptionsSubScreenAccessor",
+		"OptionInstanceAccessor",
+		"TooltipAccessor",
+		"GuiSetScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

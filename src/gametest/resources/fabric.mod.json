@@ -1,15 +1,16 @@
 {
 	"schemaVersion": 1,
-	"id": "kks-chat-gametest",
+	"id": "yap-chat-gametest",
 	"version": "1.0.0",
-	"name": "KKS Chat in-game tests",
+	"name": "Yap Chat in-game tests",
 	"environment": "client",
 	"entrypoints": {
 		"fabric-client-gametest": [
-			"com.ddev14.kkschat.gametest.KksChatClientGameTest"
+			"com.ddev14.yapchat.gametest.YapChatClientGameTest",
+			"com.ddev14.yapchat.gametest.YapChatReadmeShots"
 		]
 	},
 	"depends": {
-		"kks-chat": "*"
+		"yap-chat": "*"
 	}
 }
