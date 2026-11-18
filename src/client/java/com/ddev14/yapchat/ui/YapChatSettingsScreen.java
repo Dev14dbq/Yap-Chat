@@ -8,9 +8,7 @@ import com.ddev14.yapchat.chat.ChatAnimationType;
 import com.ddev14.yapchat.chat.ChatDisplayTiming;
 import com.ddev14.yapchat.chat.ChatLayout;
 import com.ddev14.yapchat.mixin.client.OptionInstanceAccessor;
-import com.ddev14.yapchat.mixin.client.TooltipAccessor;
 import net.minecraft.client.OptionInstance;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import com.ddev14.yapchat.chat.ChatMessageEntry;
 import com.ddev14.yapchat.chat.MessageBounds;
@@ -36,7 +34,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import com.ddev14.yapchat.compat.Argb;
@@ -357,8 +355,7 @@ public class YapChatSettingsScreen extends Screen {
 		java.util.function.Function<Object, Component> label = acc.yapchat$toString();
 		Component desc = null;
 		try {
-			Tooltip tip = acc.yapchat$tooltip().apply(o.get());
-			if (tip != null) desc = ((TooltipAccessor) tip).yapchat$message();
+			desc = com.ddev14.yapchat.compat.Compat.optionTooltip(o);
 		} catch (RuntimeException ignored) {
 		}
 
@@ -793,7 +790,7 @@ public class YapChatSettingsScreen extends Screen {
 	// ── Screen methods (their signatures differ between Minecraft versions) ──
 
 	@Override
-	public void render(GuiGraphics raw, int mx, int my, float delta) {
+	public void render(PoseStack raw, int mx, int my, float delta) {
 		renderBackground(raw);
 		super.render(raw, mx, my, delta);
 		Gfx g = Gfx.of(raw);

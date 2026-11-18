@@ -9,22 +9,20 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.Util;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector4f;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/** Small game calls whose names differ between Minecraft versions (this file: 1.20.1). */
+/** Small game calls whose names differ between Minecraft versions (this file: 1.19.2). */
 public final class Compat {
 	private Compat() {}
 
@@ -54,15 +52,15 @@ public final class Compat {
 	}
 
 	public static Item item(ResourceLocation id) {
-		return BuiltInRegistries.ITEM.get(id);
+		return Registry.ITEM.get(id);
 	}
 
 	public static ResourceLocation itemId(Item item) {
-		return BuiltInRegistries.ITEM.getKey(item);
+		return Registry.ITEM.getKey(item);
 	}
 
 	public static Set<ResourceLocation> itemIds() {
-		return BuiltInRegistries.ITEM.keySet();
+		return Registry.ITEM.keySet();
 	}
 
 	public static String name(GameProfile profile) {
@@ -89,7 +87,7 @@ public final class Compat {
 	public static String chatTypeId(net.minecraft.network.chat.ChatType.Bound params) {
 		var level = Minecraft.getInstance().level;
 		if (level == null) return null;
-		ResourceLocation key = level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.CHAT_TYPE)
+		ResourceLocation key = level.registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY)
 				.getKey(params.chatType());
 		return key == null ? null : key.toString();
 	}
@@ -104,6 +102,26 @@ public final class Compat {
 				new net.minecraft.client.gui.screens.ChatOptionsScreen(null, options)).yapchat$smallOptions();
 	}
 
+	/** Body of a signed chat message (the server's text). */
+	public static net.minecraft.network.chat.Component chatBody(net.minecraft.network.chat.PlayerChatMessage signed) {
+		return signed.unsignedContent().orElse(signed.serverContent());
+	}
+
+	/** Tooltip of a vanilla option, as one text. */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static net.minecraft.network.chat.Component optionTooltip(net.minecraft.client.OptionInstance option) {
+		var factory = ((com.ddev14.yapchat.mixin.client.OptionInstanceAccessor) (Object) option).yapchat$tooltip();
+		List<net.minecraft.util.FormattedCharSequence> lines = (List<net.minecraft.util.FormattedCharSequence>)
+				factory.apply(Minecraft.getInstance()).apply(option.get());
+		if (lines == null || lines.isEmpty()) return null;
+		StringBuilder sb = new StringBuilder();
+		for (net.minecraft.util.FormattedCharSequence line : lines) {
+			if (sb.length() > 0) sb.append(' ');
+			line.accept((i, style, cp) -> { sb.appendCodePoint(cp); return true; });
+		}
+		return net.minecraft.network.chat.Component.literal(sb.toString());
+	}
+
 	public static boolean showHat(Player player) {
 		return player.isModelPartShown(net.minecraft.world.entity.player.PlayerModelPart.HAT);
 	}
@@ -112,29 +130,37 @@ public final class Compat {
 	public static void sendCommand(String command) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player == null) return;
-		mc.player.connection.sendCommand(command.startsWith("/") ? command.substring(1) : command);
+		String c = command.startsWith("/") ? command.substring(1) : command;
+		if (!mc.player.commandUnsigned(c)) mc.player.commandSigned(c, null);
 	}
 
 	public static void drawPlayer(Gfx g, int x1, int y1, int x2, int y2, int size, float yOffset,
 			float mouseX, float mouseY, LivingEntity entity) {
 		int x = (x1 + x2) / 2;
-		InventoryScreen.renderEntityInInventoryFollowsMouse(g.raw, x, y2, size, x - mouseX, y2 - size * 1.4f - mouseY, entity);
+		InventoryScreen.renderEntityInInventory(x, y2, size, x - mouseX, y2 - size * 1.4f - mouseY, entity);
 	}
 
 	/**
 	 * Screen position (GUI pixels) of a point in the world, or null if it is behind the camera.
+	 * Plain math, the same view rotation as LevelRenderer (pitch, then yaw + 180) and a perspective
+	 * projection with the current field of view.
 	 */
 	public static float[] project(Vec3 world, float partialTick, int screenW, int screenH) {
 		Minecraft mc = Minecraft.getInstance();
 		Camera cam = mc.gameRenderer.getMainCamera();
 		double fov = ((GameRendererAccessor) mc.gameRenderer).yapchat$getFov(cam, partialTick, true);
-		Matrix4f proj = mc.gameRenderer.getProjectionMatrix(fov);
-		Matrix4f view = new Matrix4f().rotateX((float) Math.toRadians(cam.getXRot()))
-				.rotateY((float) Math.toRadians(cam.getYRot() + 180f)); // like LevelRenderer in 1.20.1
 		Vec3 cp = cam.getPosition();
-		Vector4f v = new Vector4f((float) (world.x - cp.x), (float) (world.y - cp.y), (float) (world.z - cp.z), 1f);
-		v.mul(view).mul(proj);
-		if (v.w < 0.05f) return null;
-		return new float[] {(v.x / v.w + 1f) * 0.5f * screenW, (1f - v.y / v.w) * 0.5f * screenH};
+		double x = world.x - cp.x, y = world.y - cp.y, z = world.z - cp.z;
+		double yaw = Math.toRadians(cam.getYRot() + 180f), pitch = Math.toRadians(cam.getXRot());
+		double x1 = Math.cos(yaw) * x + Math.sin(yaw) * z;
+		double z1 = -Math.sin(yaw) * x + Math.cos(yaw) * z;
+		double y2 = Math.cos(pitch) * y - Math.sin(pitch) * z1;
+		double z2 = Math.sin(pitch) * y + Math.cos(pitch) * z1;
+		double depth = -z2;
+		if (depth < 0.05) return null;
+		double f = 1.0 / Math.tan(Math.toRadians(fov) / 2.0);
+		double aspect = mc.getWindow().getWidth() / (double) Math.max(1, mc.getWindow().getHeight());
+		double nx = f / aspect * x1 / depth, ny = f * y2 / depth;
+		return new float[] {(float) ((nx + 1) * 0.5 * screenW), (float) ((1 - ny) * 0.5 * screenH)};
 	}
 }

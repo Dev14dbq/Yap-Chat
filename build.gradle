@@ -47,8 +47,8 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	// Mod Menu (compileOnly: рантайм-jar уже лежит в run/mods)
-	modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
-	modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
+	modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}", { transitive = false }
+	modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}", { transitive = false }
 }
 
 processResources {

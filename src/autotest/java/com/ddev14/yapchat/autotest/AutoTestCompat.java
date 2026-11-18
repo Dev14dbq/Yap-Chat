@@ -9,7 +9,7 @@ import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 
 import java.lang.reflect.Method;
 
-/** Version-specific bits of the dev autotest (this file: 1.20.1). */
+/** Version-specific bits of the dev autotest (this file: 1.19.2). */
 final class AutoTestCompat {
 	private AutoTestCompat() {}
 
@@ -24,7 +24,9 @@ final class AutoTestCompat {
 		mc.execute(() -> {
 			try {
 				CreateWorldScreen s = (CreateWorldScreen) mc.screen;
-				s.getUiState().setAllowCheats(true);
+				java.lang.reflect.Field f = CreateWorldScreen.class.getDeclaredField("commands");
+				f.setAccessible(true);
+				f.setBoolean(s, true);
 				Method m = CreateWorldScreen.class.getDeclaredMethod("onCreate");
 				m.setAccessible(true);
 				m.invoke(s);
@@ -41,11 +43,11 @@ final class AutoTestCompat {
 	}
 
 	static void sendChat(String text) {
-		Minecraft.getInstance().player.connection.sendChat(text);
+		Minecraft.getInstance().player.chatSigned(text, null);
 	}
 
 	static void sendCommand(String command) {
-		Minecraft.getInstance().player.connection.sendCommand(command);
+		Compat.sendCommand(command);
 	}
 
 	static Screen vanillaChatOptions() {

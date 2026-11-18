@@ -157,7 +157,7 @@ public final class MessagePresenter {
 			if (!result.contains(e.getKey())) continue;
 			String path = e.getKey().substring(e.getKey().indexOf(':') + 1).replace('_', ' ');
 			String fallback = Character.toUpperCase(path.charAt(0)) + path.substring(1);
-			result = result.replace(e.getKey(), lang.getOrDefault(e.getValue(), fallback));
+			result = result.replace(e.getKey(), (lang.has(e.getValue()) ? lang.getOrDefault(e.getValue()) : fallback));
 		}
 		return result.equals(text) ? component : Component.literal(result).setStyle(component.getStyle());
 	}

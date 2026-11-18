@@ -4,7 +4,6 @@ import com.ddev14.yapchat.compat.Compat;
 import com.ddev14.yapchat.compat.Gfx;
 import com.ddev14.yapchat.pipeline.MessageIngest;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.server.packs.PackType;
@@ -37,12 +36,6 @@ public class YapChatModClient implements ClientModInitializer {
 		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(
 				com.ddev14.yapchat.bubble.BubbleSkins.INSTANCE);
 
-		// Every message goes through MessageIngest; the return value tells Fabric
-		// whether vanilla should still show it (only when Yap Chat is disabled).
-		ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) ->
-				MessageIngest.onGameMessage(HUD, message, overlay));
-
-		ClientReceiveMessageEvents.ALLOW_CHAT.register((message, signedMessage, sender, chatType, timestamp) ->
-				MessageIngest.onPlayerChat(HUD, message, signedMessage, sender, chatType));
+		// Incoming messages: mixin.client.ChatListenerMixin → MessageIngest.
 	}
 }

@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import com.ddev14.yapchat.compat.Argb;
 import net.minecraft.world.entity.player.Player;

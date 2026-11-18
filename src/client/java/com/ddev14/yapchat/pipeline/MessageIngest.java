@@ -36,7 +36,7 @@ public final class MessageIngest {
 				: com.ddev14.yapchat.compat.Compat.chatTypeId(params);
 		Component body = null;
 		if (signed != null) {
-			body = signed.unsignedContent() != null ? signed.unsignedContent() : signed.decoratedContent();
+			body = com.ddev14.yapchat.compat.Compat.chatBody(signed);
 		}
 		IncomingMessage in = new IncomingMessage(message, Source.PLAYER_CHAT, chatTypeId,
 				params != null ? params.name() : null,

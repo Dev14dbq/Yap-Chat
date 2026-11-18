@@ -17,5 +17,5 @@ public interface OptionInstanceAccessor {
 	Function<Object, Component> yapchat$toString();
 
 	@Accessor("tooltip")
-	OptionInstance.TooltipSupplier<Object> yapchat$tooltip();
+	OptionInstance.TooltipSupplierFactory<Object> yapchat$tooltip();
 }

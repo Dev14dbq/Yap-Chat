@@ -10,9 +10,10 @@
 		"ChatOptionsScreenAccessor",
 		"OptionsSubScreenAccessor",
 		"OptionInstanceAccessor",
-		"TooltipAccessor",
 		"GuiSetScreenMixin",
-		"GameRendererAccessor"
+		"GameRendererAccessor",
+		"ScreenAccessor",
+		"ChatListenerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
