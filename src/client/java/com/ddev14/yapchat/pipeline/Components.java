@@ -140,7 +140,7 @@ public final class Components {
 		HoverEvent hover = style.getHoverEvent();
 		HoverEvent.EntityTooltipInfo info = hover == null ? null : hover.getValue(HoverEvent.Action.SHOW_ENTITY);
 		if (info != null) {
-			String name = info.name.map(n -> stripCodes(n.getString()).trim()).orElse(null);
+			String name = info.name == null ? null : stripCodes(info.name.getString()).trim();
 			if (isNick(name)) return new Identity(name, info.id);
 		}
 		return null;

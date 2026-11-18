@@ -16,7 +16,8 @@ import java.util.List;
 /**
  * The drawing calls Yap Chat uses, in one place. Each Minecraft version has its own
  * implementation of this class; the rest of the mod only talks to it.
- * (Minecraft 1.21.1: GuiGraphics with a 3D pose stack; tints go through the shader color.)
+ * (Minecraft 1.20.1: GuiGraphics with a 3D pose stack; tints go through the shader color;
+ * no GUI sprite atlas, so sprites are nine-sliced by {@link NineSlice}.)
  */
 public final class Gfx {
 	public final GuiGraphics raw;
@@ -106,9 +107,7 @@ public final class Gfx {
 	/** GUI sprite (textures/gui/sprites/...), nine-sliced or stretched as its .mcmeta says. */
 	public void blitSprite(ResourceLocation sprite, int x, int y, int w, int h, int color) {
 		if (Argb.alpha(color) == 0) return;
-		tint(color);
-		raw.blitSprite(sprite, x, y, w, h);
-		untint();
+		NineSlice.draw(this, sprite, x, y, w, h, color);
 	}
 
 	public void item(ItemStack stack, int x, int y) {

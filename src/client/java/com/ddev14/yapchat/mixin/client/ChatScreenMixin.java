@@ -19,7 +19,7 @@ public abstract class ChatScreenMixin extends Screen {
 	}
 
 	@Inject(at = @At("HEAD"), method = "mouseScrolled", cancellable = false)
-	private void onMouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> cir) {
+	private void onMouseScrolled(double mouseX, double mouseY, double deltaY, CallbackInfoReturnable<Boolean> cir) {
 		// Перехватываем прокрутку мыши для истории чата
 		YapChatHud hud = YapChatModClient.getHud();
 		if (hud != null) {

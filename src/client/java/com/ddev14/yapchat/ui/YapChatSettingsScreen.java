@@ -7,7 +7,6 @@ import com.ddev14.yapchat.bubble.ChatBubbles;
 import com.ddev14.yapchat.chat.ChatAnimationType;
 import com.ddev14.yapchat.chat.ChatDisplayTiming;
 import com.ddev14.yapchat.chat.ChatLayout;
-import com.ddev14.yapchat.mixin.client.ChatOptionsScreenAccessor;
 import com.ddev14.yapchat.mixin.client.OptionInstanceAccessor;
 import com.ddev14.yapchat.mixin.client.TooltipAccessor;
 import net.minecraft.client.OptionInstance;
@@ -293,7 +292,7 @@ public class YapChatSettingsScreen extends Screen {
 			}
 			case MINECRAFT -> {
 				rows.add(header("section.vanilla"));
-				for (OptionInstance<?> o : ChatOptionsScreenAccessor.yapchat$options(minecraft.options)) {
+				for (OptionInstance<?> o : com.ddev14.yapchat.compat.Compat.chatOptions(minecraft.options)) {
 					Row r = vanillaRow(o);
 					if (r != null) rows.add(r);
 				}
@@ -795,6 +794,7 @@ public class YapChatSettingsScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics raw, int mx, int my, float delta) {
+		renderBackground(raw);
 		super.render(raw, mx, my, delta);
 		Gfx g = Gfx.of(raw);
 		renderContent(g, mx, my);
@@ -818,8 +818,8 @@ public class YapChatSettingsScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double mx, double my, double h, double v) {
-		return onScroll(mx, my, v) || super.mouseScrolled(mx, my, h, v);
+	public boolean mouseScrolled(double mx, double my, double v) {
+		return onScroll(mx, my, v) || super.mouseScrolled(mx, my, v);
 	}
 
 	@Override

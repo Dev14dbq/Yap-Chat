@@ -29,7 +29,7 @@ public class YapChatModClient implements ClientModInitializer {
 		// Bubbles first, so the chat is drawn over them.
 		HudRenderCallback.EVENT.register((graphics, delta) -> {
 			Gfx g = Gfx.of(graphics);
-			com.ddev14.yapchat.bubble.ChatBubbles.render(HUD, g, delta.getGameTimeDeltaPartialTick(false));
+			com.ddev14.yapchat.bubble.ChatBubbles.render(HUD, g, delta);
 			HUD.onHudRender(g);
 			g.flushTooltips();
 		});

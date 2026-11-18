@@ -51,6 +51,7 @@ public final class BubbleSkins implements SimpleSynchronousResourceReloadListene
 	@Override
 	public void onResourceManagerReload(ResourceManager manager) {
 		cache.clear();
+		com.ddev14.yapchat.compat.NineSlice.clear();
 	}
 
 	private static Skin load(BubbleStyle style, ResourceManager manager) {

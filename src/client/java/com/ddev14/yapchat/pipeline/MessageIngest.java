@@ -33,14 +33,14 @@ public final class MessageIngest {
 	public static boolean onPlayerChat(YapChatHud hud, Component message, PlayerChatMessage signed,
 			GameProfile sender, ChatType.Bound params) {
 		String chatTypeId = params == null ? null
-				: params.chatType().unwrapKey().map(k -> k.location().toString()).orElse(null);
+				: com.ddev14.yapchat.compat.Compat.chatTypeId(params);
 		Component body = null;
 		if (signed != null) {
 			body = signed.unsignedContent() != null ? signed.unsignedContent() : signed.decoratedContent();
 		}
 		IncomingMessage in = new IncomingMessage(message, Source.PLAYER_CHAT, chatTypeId,
 				params != null ? params.name() : null,
-				params != null ? params.targetName().orElse(null) : null,
+				params != null ? com.ddev14.yapchat.compat.Compat.chatTarget(params) : null,
 				sender != null ? com.ddev14.yapchat.compat.Compat.uuid(sender) : null,
 				sender != null ? com.ddev14.yapchat.compat.Compat.name(sender) : null,
 				body, false);

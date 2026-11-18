@@ -4,12 +4,12 @@ import com.ddev14.yapchat.compat.Compat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.options.ChatOptionsScreen;
+import net.minecraft.client.gui.screens.ChatOptionsScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 
 import java.lang.reflect.Method;
 
-/** Version-specific bits of the dev autotest (this file: 1.21.1). */
+/** Version-specific bits of the dev autotest (this file: 1.20.1). */
 final class AutoTestCompat {
 	private AutoTestCompat() {}
 
@@ -24,7 +24,7 @@ final class AutoTestCompat {
 		mc.execute(() -> {
 			try {
 				CreateWorldScreen s = (CreateWorldScreen) mc.screen;
-				s.getUiState().setAllowCommands(true);
+				s.getUiState().setAllowCheats(true);
 				Method m = CreateWorldScreen.class.getDeclaredMethod("onCreate");
 				m.setAccessible(true);
 				m.invoke(s);

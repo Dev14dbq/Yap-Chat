@@ -6,7 +6,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.PlainTextContents;
+import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.ComponentContents;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -123,7 +124,7 @@ public final class MessagePresenter {
 			if (style.getColor() != null) styled[0] = true;
 			return java.util.Optional.empty();
 		}, Style.EMPTY);
-		return !styled[0] && (c.getContents() instanceof PlainTextContents || c.getContents() == PlainTextContents.EMPTY);
+		return !styled[0] && (c.getContents() instanceof LiteralContents || c.getContents() == ComponentContents.EMPTY);
 	}
 
 	private static final Map<String, String> MINECRAFT_ID_TO_KEY;
@@ -147,7 +148,7 @@ public final class MessagePresenter {
 	private static Component prettifyIds(Component component) {
 		String text = component.getString();
 		if (!text.contains("minecraft:") || !component.getSiblings().isEmpty()
-				|| !(component.getContents() instanceof PlainTextContents)) {
+				|| !(component.getContents() instanceof LiteralContents)) {
 			return component;
 		}
 		String result = text;
