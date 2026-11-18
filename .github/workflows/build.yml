@@ -40,17 +40,18 @@ jobs:
           path: build/libs/*.jar
           if-no-files-found: error
 
-      - name: Install a virtual display for the in-game tests
+      # Loom starts its own virtual display (Xvfb) for the client on Linux; Mesa
+      # gives it software OpenGL and Vulkan, as in Fabric API's own CI.
+      - name: Install software graphics drivers for the in-game tests
         if: hashFiles('src/gametest/**') != ''
         run: |
           sudo apt-get update -q
-          sudo apt-get install -yq xvfb libgl1-mesa-dri libglx-mesa0
+          sudo apt-get install -yq xvfb mesa-vulkan-drivers libgl1-mesa-dri
 
       - name: In-game tests
         if: hashFiles('src/gametest/**') != ''
-        env:
-          LIBGL_ALWAYS_SOFTWARE: "1"
-        run: xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew runClientGameTest --stacktrace
+        timeout-minutes: 15
+        run: ./gradlew runClientGameTest --stacktrace
 
       - name: Upload test screenshots and logs
         if: always() && hashFiles('src/gametest/**') != ''
