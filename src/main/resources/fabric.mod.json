@@ -27,6 +27,7 @@
 			"com.ddev14.yapchat.ModMenuIntegration"
 		]
 	},
+	"accessWidener": "yap-chat.accesswidener",
 	"mixins": [
 		"yap-chat.mixins.json",
 		{
