@@ -32,6 +32,11 @@ public final class MessageIngest {
 	/** Fabric {@code ALLOW_CHAT}: player chat packets, including vanilla /msg and /teammsg. */
 	public static boolean onPlayerChat(YapChatHud hud, Component message, PlayerChatMessage signed,
 			GameProfile sender, ChatType.Bound params) {
+		// Vanilla "Chat: Commands Only / Hidden": player chat is not shown (no bubble either).
+		if (net.minecraft.client.Minecraft.getInstance().options.chatVisibility().get()
+				!= net.minecraft.world.entity.player.ChatVisiblity.FULL) {
+			return false;
+		}
 		String chatTypeId = params == null ? null
 				: params.chatType().unwrapKey().map(k -> k.identifier().toString()).orElse(null);
 		Component body = null;

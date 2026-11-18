@@ -12,7 +12,8 @@
 		"OptionInstanceAccessor",
 		"TooltipAccessor",
 		"GuiSetScreenMixin",
-		"GameRendererAccessor"
+		"GameRendererAccessor",
+		"ChatScreenInvoker"
 	],
 	"injectors": {
 		"defaultRequire": 1
