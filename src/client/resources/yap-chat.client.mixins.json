@@ -11,7 +11,8 @@
 		"OptionsSubScreenAccessor",
 		"OptionInstanceAccessor",
 		"TooltipAccessor",
-		"GuiSetScreenMixin"
+		"GuiSetScreenMixin",
+		"ChatScreenInvoker"
 	],
 	"injectors": {
 		"defaultRequire": 1
