@@ -68,6 +68,7 @@ class MessageClassifierTest {
 			assertEquals(MessageType.WHISPER, m.type());
 			assertEquals(Direction.INCOMING, m.direction());
 			assertEquals("Steve", m.senderName());
+			assertEquals(ME, m.receiverName());
 			assertEquals("hi", m.body().getString());
 			assertEquals(Tier.CHAT_TYPE, m.tier());
 		}

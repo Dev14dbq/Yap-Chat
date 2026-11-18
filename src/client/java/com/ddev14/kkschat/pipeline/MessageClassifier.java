@@ -94,7 +94,7 @@ public final class MessageClassifier {
 		Direction dir = type.equals(CT_MSG_IN) || type.equals(CT_TEAM_IN) ? Direction.INCOMING : Direction.NONE;
 		return new ClassifiedMessage(mt, dir,
 				sender != null ? sender.name() : null, sender != null ? sender.id() : in.senderId(), in.senderDisplay(),
-				null, null, body, in, Tier.CHAT_TYPE);
+				dir == Direction.INCOMING ? ctx.localPlayerName() : null, null, body, in, Tier.CHAT_TYPE);
 	}
 
 	private static Identity senderIdentity(IncomingMessage in) {
@@ -144,7 +144,7 @@ public final class MessageClassifier {
 				Identity who = Components.identity(name);
 				return new ClassifiedMessage(MessageType.WHISPER, Direction.INCOMING,
 						who != null ? who.name() : null, who != null ? who.id() : null, name,
-						null, null, Components.arg(tc, 1), in, Tier.TRANSLATION_KEY);
+						ctx.localPlayerName(), null, Components.arg(tc, 1), in, Tier.TRANSLATION_KEY);
 			}
 			case "commands.message.display.outgoing" -> {
 				Component name = Components.arg(tc, 0);

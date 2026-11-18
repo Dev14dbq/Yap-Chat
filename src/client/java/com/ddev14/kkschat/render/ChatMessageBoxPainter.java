@@ -79,7 +79,10 @@ public final class ChatMessageBoxPainter {
 		int fullTextWidth = font.width(component);
 
 		boolean isJoinMessage = entry.isJoinMessage();
-		int avatarAreaWidth = isJoinMessage ? 0 : ChatLayout.AVATAR_SIZE;
+		boolean whisperHeads = usesWhisperHeads(entry);
+		int avatarAreaWidth = isJoinMessage ? 0
+				: whisperHeads ? whisperHeadsWidth(font)
+				: ChatLayout.AVATAR_SIZE;
 
 		int leftNonText = isJoinMessage ? ChatLayout.HORIZONTAL_PADDING : (ChatLayout.HORIZONTAL_PADDING + avatarAreaWidth + 7);
 		int rightNonText = ChatLayout.HORIZONTAL_PADDING;
@@ -122,6 +125,8 @@ public final class ChatMessageBoxPainter {
 
 		if (entry.isCollapsed) {
 			ChatHudAvatarRenderer.renderClockIcon(guiGraphics, avatarX, avatarY, alpha);
+		} else if (whisperHeads) {
+			renderWhisperHeads(guiGraphics, font, entry, avatarX, avatarY, alpha);
 		} else if (!isJoinMessage) {
 			renderAvatar(guiGraphics, entry, avatarX, avatarY, alpha);
 		}
@@ -220,6 +225,44 @@ public final class ChatMessageBoxPainter {
 			case WHISPER       -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconWhisper() : null, new ItemStack(Items.PAPER));
 			case JOIN_LEAVE    -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconJoinLeave() : null, new ItemStack(Items.OAK_DOOR));
 			default            -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconSystem() : null, new ItemStack(Items.STICK));
+		}
+	}
+
+	// ── Whisper: [sender head] → [receiver head] ─────────────────────────────
+
+	private static final String WHISPER_ARROW = "→";
+	private static final int WHISPER_ARROW_GAP = 3;
+
+	private static boolean usesWhisperHeads(ChatMessageEntry entry) {
+		return entry.type == MessageType.WHISPER && entry.iconOverride == null && !entry.isCollapsed;
+	}
+
+	private static int whisperHeadsWidth(Font font) {
+		return ChatLayout.AVATAR_SIZE * 2 + WHISPER_ARROW_GAP * 2 + font.width(WHISPER_ARROW);
+	}
+
+	/**
+	 * Who wrote to whom: author's head, an arrow, recipient's head.
+	 * Incoming: other player → you. Outgoing: you → other player.
+	 */
+	private static void renderWhisperHeads(GuiGraphicsExtractor g, Font font, ChatMessageEntry entry,
+			int x, int y, float alpha) {
+		renderHead(g, x, y, alpha, entry.senderInfo, entry.senderName);
+
+		int arrowX = x + ChatLayout.AVATAR_SIZE + WHISPER_ARROW_GAP;
+		int arrowY = y + (ChatLayout.AVATAR_SIZE - font.lineHeight) / 2 + 1;
+		int arrowColor = ((int) (255 * alpha) << 24) | 0xAAAAAA;
+		g.text(font, WHISPER_ARROW, arrowX, arrowY, arrowColor, false);
+
+		int receiverX = arrowX + font.width(WHISPER_ARROW) + WHISPER_ARROW_GAP;
+		renderHead(g, receiverX, y, alpha, entry.receiverInfo, entry.receiverName);
+	}
+
+	private static void renderHead(GuiGraphicsExtractor g, int x, int y, float alpha, PlayerInfo info, String name) {
+		if (info != null) {
+			ChatHudAvatarRenderer.renderPlayerHead(g, x, y, info, alpha);
+		} else {
+			ChatHudAvatarRenderer.renderPlayerHeadByName(g, x, y, name, alpha);
 		}
 	}
 }

@@ -5,7 +5,6 @@ import com.ddev14.kkschat.chat.MessageType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.PlainTextContents;
 
@@ -43,6 +42,10 @@ public final class MessagePresenter {
 
 	// ── Whisper ──────────────────────────────────────────────────────────────
 
+	/**
+	 * "[Name]: text", where Name is the other player. The direction is shown by the two heads
+	 * with an arrow between them (see ChatMessageBoxPainter), so no "whispers to you" wording.
+	 */
 	private static Component whisper(ClassifiedMessage msg) {
 		boolean outgoing = msg.direction() == Direction.OUTGOING;
 		Component name = outgoing
@@ -51,9 +54,11 @@ public final class MessagePresenter {
 		if (msg.body() == null || name == null) {
 			return convertLegacy(msg.origin().content(), LegacyAmpersandFormatting::applyLegacyColorCodesForSystem);
 		}
-		MutableComponent prefix = Component.translatable(outgoing ? "kkschat.whisper.to" : "kkschat.whisper.from", name)
-				.withStyle(ChatFormatting.GRAY);
-		return prefix.append(Component.literal(" ")).append(body(msg.body()));
+		return Component.literal("[").withStyle(ChatFormatting.GOLD)
+				.append(name)
+				.append(Component.literal("]:"))
+				.append(Component.literal(" ").withStyle(ChatFormatting.WHITE))
+				.append(body(msg.body()));
 	}
 
 	// ── Player chat ──────────────────────────────────────────────────────────

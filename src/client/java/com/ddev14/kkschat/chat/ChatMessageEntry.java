@@ -65,6 +65,18 @@ public final class ChatMessageEntry {
 	public boolean isScreenshot()   { return type == MessageType.SCREENSHOT; }
 	public boolean isSystemMessage(){ return type.isSystem(); }
 
+	/** A fresh single copy of this message (same text, people and direction), for grouping. */
+	public ChatMessageEntry copySingle() {
+		ChatMessageEntry c = new ChatMessageEntry(message, senderInfo, receiverInfo, type, senderName);
+		c.direction = direction;
+		c.receiverName = receiverName;
+		if (senderUUID != null) c.senderUUID = senderUUID;
+		c.iconOverride = iconOverride;
+		c.noStyle = noStyle;
+		c.displayTimeOverride = displayTimeOverride;
+		return c;
+	}
+
 	public void updateSenderInfo(PlayerInfo newInfo) {
 		if (newInfo != null && (senderInfo == null || senderUUID == null || senderUUID.equals(newInfo.getProfile().id()))) {
 			this.senderInfo = newInfo;
