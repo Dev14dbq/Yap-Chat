@@ -24,7 +24,5 @@
   "kkschat.time.night": "Noc",
   "kkschat.time.midnight": "Północ",
   "kkschat.time.sunrise": "Wschód słońca",
-  "kkschat.time.dawn": "Świt",
-  "kkschat.whisper.from": "Szept od [%s]:",
-  "kkschat.whisper.to": "Szept do [%s]:"
+  "kkschat.time.dawn": "Świt"
 }

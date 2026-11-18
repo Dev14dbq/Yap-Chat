@@ -24,7 +24,5 @@
   "kkschat.time.night": "الليل",
   "kkschat.time.midnight": "منتصف الليل",
   "kkschat.time.sunrise": "الشروق",
-  "kkschat.time.dawn": "الفجر",
-  "kkschat.whisper.from": "همسة من [%s]:",
-  "kkschat.whisper.to": "همسة إلى [%s]:"
+  "kkschat.time.dawn": "الفجر"
 }

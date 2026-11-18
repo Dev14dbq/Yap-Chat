@@ -117,13 +117,11 @@ public class KksChatHud {
 	/** Stores a classified message in the history. Called by {@link com.ddev14.kkschat.pipeline.MessageIngest}. */
 	public void addMessage(com.ddev14.kkschat.pipeline.ClassifiedMessage msg, Component display,
 			PlayerInfo senderInfo, PlayerInfo receiverInfo) {
-		ChatMessageEntry entry = ChatHistoryAppender.addLine(this, display, senderInfo, receiverInfo,
-				msg.type(), msg.senderName());
-		if (entry != null && entry.repeatCount == 1) {
-			entry.direction = msg.direction();
-			entry.receiverName = msg.receiverName();
-			if (entry.senderUUID == null) entry.senderUUID = msg.senderId();
-		}
+		ChatMessageEntry candidate = new ChatMessageEntry(display, senderInfo, receiverInfo, msg.type(), msg.senderName());
+		candidate.direction = msg.direction();
+		candidate.receiverName = msg.receiverName();
+		if (candidate.senderUUID == null) candidate.senderUUID = msg.senderId();
+		ChatHistoryAppender.addLine(this, candidate);
 	}
 
 	/** Read-only copy of the history, oldest first (used by tests and integrations). */

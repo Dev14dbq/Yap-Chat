@@ -24,7 +24,5 @@
   "kkschat.time.night": "Gece",
   "kkschat.time.midnight": "Gece yarısı",
   "kkschat.time.sunrise": "Gün doğumu",
-  "kkschat.time.dawn": "Şafak",
-  "kkschat.whisper.from": "[%s] fısıldıyor:",
-  "kkschat.whisper.to": "[%s] adlı oyuncuya fısıltı:"
+  "kkschat.time.dawn": "Şafak"
 }

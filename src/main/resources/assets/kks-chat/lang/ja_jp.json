@@ -24,7 +24,5 @@
   "kkschat.time.night": "夜",
   "kkschat.time.midnight": "深夜",
   "kkschat.time.sunrise": "夜明け",
-  "kkschat.time.dawn": "払暁",
-  "kkschat.whisper.from": "[%s]からのささやき:",
-  "kkschat.whisper.to": "[%s]へのささやき:"
+  "kkschat.time.dawn": "払暁"
 }
