@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +25,7 @@ import java.util.Optional;
 public final class ItemIcons {
 	private ItemIcons() {}
 
-	private record Flat(Identifier texture, int width, int height) {}
+	private record Flat(ResourceLocation texture, int width, int height) {}
 
 	private static final Map<Item, Optional<Flat>> FLAT = new HashMap<>();
 
@@ -74,7 +74,7 @@ public final class ItemIcons {
 
 	private static Optional<Flat> flat(Item item) {
 		return FLAT.computeIfAbsent(item, it -> {
-			Identifier id = com.ddev14.yapchat.compat.Compat.itemId(it);
+			ResourceLocation id = com.ddev14.yapchat.compat.Compat.itemId(it);
 			String ns = id.getNamespace(), path = id.getPath();
 			String[] candidates = {
 					"textures/item/" + path + ".png",
@@ -84,7 +84,7 @@ public final class ItemIcons {
 					"textures/block/" + path + "_top.png",
 			};
 			for (String c : candidates) {
-				Identifier tex = com.ddev14.yapchat.compat.Compat.id(ns, c);
+				ResourceLocation tex = com.ddev14.yapchat.compat.Compat.id(ns, c);
 				Optional<Resource> res = Minecraft.getInstance().getResourceManager().getResource(tex);
 				if (res.isEmpty()) continue;
 				try (InputStream in = res.get().open(); NativeImage img = NativeImage.read(in)) {

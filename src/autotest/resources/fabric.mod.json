@@ -1,0 +1,11 @@
+{
+	"schemaVersion": 1,
+	"id": "yap-chat-autotest",
+	"version": "1.0.0",
+	"name": "Yap Chat in-game check (dev only)",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["com.ddev14.yapchat.autotest.YapChatAutoTest"]
+	},
+	"depends": {"yap-chat": "*"}
+}

@@ -128,8 +128,8 @@ public final class Components {
 
 		ClickEvent click = style.getClickEvent();
 		String command = null;
-		if (click instanceof ClickEvent.SuggestCommand(String c)) command = c;
-		else if (click instanceof ClickEvent.RunCommand(String c)) command = c;
+		if (click != null && (click.getAction() == ClickEvent.Action.SUGGEST_COMMAND
+				|| click.getAction() == ClickEvent.Action.RUN_COMMAND)) command = click.getValue();
 		if (command != null) {
 			String[] parts = command.trim().split("\\s+");
 			if (parts.length >= 2 && parts[0].matches("(?i)/(tell|msg|w|whisper|m|t|pm|r|reply)") && isNick(parts[1])) {
@@ -138,10 +138,10 @@ public final class Components {
 		}
 
 		HoverEvent hover = style.getHoverEvent();
-		if (hover instanceof HoverEvent.ShowEntity show) {
-			HoverEvent.EntityTooltipInfo info = show.entity();
+		HoverEvent.EntityTooltipInfo info = hover == null ? null : hover.getValue(HoverEvent.Action.SHOW_ENTITY);
+		if (info != null) {
 			String name = info.name.map(n -> stripCodes(n.getString()).trim()).orElse(null);
-			if (isNick(name)) return new Identity(name, info.uuid);
+			if (isNick(name)) return new Identity(name, info.id);
 		}
 		return null;
 	}

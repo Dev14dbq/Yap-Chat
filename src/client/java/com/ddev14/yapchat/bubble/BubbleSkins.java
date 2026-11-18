@@ -3,10 +3,10 @@ package com.ddev14.yapchat.bubble;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,12 +26,12 @@ import java.util.Optional;
  * </ul>
  * {@code <style>} is dark, white, tooltip or nametag.
  */
-public final class BubbleSkins implements ResourceManagerReloadListener {
+public final class BubbleSkins implements SimpleSynchronousResourceReloadListener {
 	private static final Logger LOG = LoggerFactory.getLogger("yap-chat");
 	public static final BubbleSkins INSTANCE = new BubbleSkins();
 
 	/** Everything needed to draw one style. */
-	public record Skin(Identifier body, Identifier tailSprite, int textColor, boolean textShadow,
+	public record Skin(ResourceLocation body, ResourceLocation tailSprite, int textColor, boolean textShadow,
 			int padX, int padY, float minOpacity, boolean tail, int tailWidth, int tailHeight,
 			int tailAnchor, int tailOverlap) {}
 
@@ -44,6 +44,11 @@ public final class BubbleSkins implements ResourceManagerReloadListener {
 	}
 
 	@Override
+	public ResourceLocation getFabricId() {
+		return com.ddev14.yapchat.compat.Compat.id("yap-chat", "bubble_styles");
+	}
+
+	@Override
 	public void onResourceManagerReload(ResourceManager manager) {
 		cache.clear();
 	}
@@ -51,7 +56,7 @@ public final class BubbleSkins implements ResourceManagerReloadListener {
 	private static Skin load(BubbleStyle style, ResourceManager manager) {
 		String key = style.name().toLowerCase(Locale.ROOT);
 		JsonObject o = new JsonObject();
-		Identifier json = com.ddev14.yapchat.compat.Compat.id("yap-chat", "bubbles/" + key + ".json");
+		ResourceLocation json = com.ddev14.yapchat.compat.Compat.id("yap-chat", "bubbles/" + key + ".json");
 		Optional<Resource> res = manager.getResource(json);
 		if (res.isPresent()) {
 			try (Reader r = res.get().openAsReader()) {

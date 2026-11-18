@@ -38,11 +38,8 @@ import net.minecraft.client.gui.Font;
 import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import com.ddev14.yapchat.compat.Argb;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
@@ -128,7 +125,7 @@ public class YapChatSettingsScreen extends Screen {
 		}
 	}
 
-	private static final Identifier LOGO = com.ddev14.yapchat.compat.Compat.id("yap-chat", "textures/gui/logo_32.png");
+	private static final ResourceLocation LOGO = com.ddev14.yapchat.compat.Compat.id("yap-chat", "textures/gui/logo_32.png");
 	private static final int SIDEBAR = 112, MARGIN = 8, ROW_H = 20, TAB_H = 20, BOTTOM = 30, TABS_Y = 38;
 	private static Tab lastTab = Tab.GENERAL;
 
@@ -805,19 +802,19 @@ public class YapChatSettingsScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-		return onClick(event.x(), event.y(), event.button()) || super.mouseClicked(event, doubleClick);
+	public boolean mouseClicked(double mx, double my, int button) {
+		return onClick(mx, my, button) || super.mouseClicked(mx, my, button);
 	}
 
 	@Override
-	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
-		return onDrag(event.x(), event.y()) || super.mouseDragged(event, dx, dy);
+	public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+		return onDrag(mx, my) || super.mouseDragged(mx, my, button, dx, dy);
 	}
 
 	@Override
-	public boolean mouseReleased(MouseButtonEvent event) {
+	public boolean mouseReleased(double mx, double my, int button) {
 		onRelease();
-		return super.mouseReleased(event);
+		return super.mouseReleased(mx, my, button);
 	}
 
 	@Override
@@ -826,13 +823,13 @@ public class YapChatSettingsScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(KeyEvent event) {
-		return onKey(event.key(), event.modifiers()) || super.keyPressed(event);
+	public boolean keyPressed(int key, int scancode, int modifiers) {
+		return onKey(key, modifiers) || super.keyPressed(key, scancode, modifiers);
 	}
 
 	@Override
-	public boolean charTyped(CharacterEvent event) {
-		return onChar(event.codepointAsString()) || super.charTyped(event);
+	public boolean charTyped(char c, int modifiers) {
+		return onChar(String.valueOf(c)) || super.charTyped(c, modifiers);
 	}
 
 	@Override

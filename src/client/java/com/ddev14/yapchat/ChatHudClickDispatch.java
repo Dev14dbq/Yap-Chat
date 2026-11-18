@@ -104,45 +104,40 @@ public final class ChatHudClickDispatch {
 		return result[0];
 	}
 
-	/**
-	 * В MC 26.1 ClickEvent — интерфейс с конкретными record-реализациями.
-	 * Каждый тип несёт свои данные через типизированные accessor-методы.
-	 */
+	/** Runs a click event of a chat message, like vanilla chat does. */
 	public static void handleClickEvent(ClickEvent clickEvent) {
 		if (clickEvent == null) return;
 
 		Minecraft minecraft = Minecraft.getInstance();
-
-		if (clickEvent instanceof ClickEvent.RunCommand run) {
-			if (minecraft.player != null) {
-				String cmd = run.command();
-				if (cmd.startsWith("/")) cmd = cmd.substring(1);
-				minecraft.player.connection.sendCommand(cmd);
+		String value = clickEvent.getValue();
+		switch (clickEvent.getAction()) {
+			case RUN_COMMAND -> {
+				if (minecraft.player != null) com.ddev14.yapchat.compat.Compat.sendCommand(value);
 			}
-		} else if (clickEvent instanceof ClickEvent.SuggestCommand suggest) {
-			if (com.ddev14.yapchat.compat.Compat.screen() instanceof ChatScreen chatScreen) {
-				String cmd = suggest.command();
-				if (!cmd.startsWith("/")) cmd = "/" + cmd;
-				chatScreen.handleChatInput(cmd, true);
+			case SUGGEST_COMMAND -> {
+				if (com.ddev14.yapchat.compat.Compat.screen() instanceof ChatScreen chatScreen) {
+					String cmd = value.startsWith("/") ? value : "/" + value;
+					chatScreen.handleChatInput(cmd, true);
+				}
 			}
-		} else if (clickEvent instanceof ClickEvent.OpenUrl openUrl) {
-			if (minecraft.options.chatLinks().get()) {
+			case OPEN_URL -> {
+				if (minecraft.options.chatLinks().get()) {
+					try {
+						java.awt.Desktop.getDesktop().browse(java.net.URI.create(value));
+					} catch (Exception e) {
+						minecraft.keyboardHandler.setClipboard(value);
+					}
+				}
+			}
+			case OPEN_FILE -> {
 				try {
-					java.awt.Desktop.getDesktop().browse(openUrl.uri());
-				} catch (Exception e) {
-					minecraft.keyboardHandler.setClipboard(openUrl.uri().toString());
+					java.io.File file = new java.io.File(value);
+					if (file.exists()) java.awt.Desktop.getDesktop().open(file);
+				} catch (Exception ignored) {
 				}
 			}
-		} else if (clickEvent instanceof ClickEvent.OpenFile openFile) {
-			try {
-				java.io.File file = openFile.file();
-				if (file.exists()) {
-					java.awt.Desktop.getDesktop().open(file);
-				}
-			} catch (Exception ignored) {
-			}
-		} else if (clickEvent instanceof ClickEvent.CopyToClipboard copy) {
-			minecraft.keyboardHandler.setClipboard(copy.value());
+			case COPY_TO_CLIPBOARD -> minecraft.keyboardHandler.setClipboard(value);
+			default -> { }
 		}
 	}
 }

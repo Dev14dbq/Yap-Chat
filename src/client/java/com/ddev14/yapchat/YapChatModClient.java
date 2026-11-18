@@ -5,8 +5,8 @@ import com.ddev14.yapchat.compat.Gfx;
 import com.ddev14.yapchat.pipeline.MessageIngest;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.server.packs.PackType;
 
 public class YapChatModClient implements ClientModInitializer {
@@ -26,14 +26,16 @@ public class YapChatModClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		HudElementRegistry.addLast(Compat.id("yap-chat", "chat_hud"),
-				(graphics, delta) -> HUD.onHudRender(Gfx.of(graphics)));
+		// Bubbles first, so the chat is drawn over them.
+		HudRenderCallback.EVENT.register((graphics, delta) -> {
+			Gfx g = Gfx.of(graphics);
+			com.ddev14.yapchat.bubble.ChatBubbles.render(HUD, g, delta.getGameTimeDeltaPartialTick(false));
+			HUD.onHudRender(g);
+			g.flushTooltips();
+		});
 		// Bubble looks come from resource packs; re-read them when packs change.
-		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloader(Compat.id("yap-chat", "bubble_styles"),
+		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(
 				com.ddev14.yapchat.bubble.BubbleSkins.INSTANCE);
-		HudElementRegistry.addFirst(Compat.id("yap-chat", "chat_bubbles"),
-				(graphics, delta) -> com.ddev14.yapchat.bubble.ChatBubbles.render(HUD, Gfx.of(graphics),
-						delta.getGameTimeDeltaPartialTick(false)));
 
 		// Every message goes through MessageIngest; the return value tells Fabric
 		// whether vanilla should still show it (only when Yap Chat is disabled).

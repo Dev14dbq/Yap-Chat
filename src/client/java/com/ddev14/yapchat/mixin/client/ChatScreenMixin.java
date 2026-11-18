@@ -4,7 +4,6 @@ import com.ddev14.yapchat.YapChatHud;
 import com.ddev14.yapchat.YapChatModClient;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,12 +29,12 @@ public abstract class ChatScreenMixin extends Screen {
 	}
 	
 	@Inject(at = @At("HEAD"), method = "mouseClicked", cancellable = true)
-	private void onMouseClicked(MouseButtonEvent event, boolean handled, CallbackInfoReturnable<Boolean> cir) {
+	private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
 		// Обрабатываем клик по сжатым сообщениям
-		if (!handled && event.button() == 0) { // Левая кнопка мыши
+		if (button == 0) { // Левая кнопка мыши
 			YapChatHud hud = YapChatModClient.getHud();
 			if (hud != null) {
-				if (hud.handleMessageClick(event.x(), event.y())) {
+				if (hud.handleMessageClick(mouseX, mouseY)) {
 					// Клик обработан, отменяем дальнейшую обработку
 					cir.setReturnValue(true);
 					cir.cancel();
@@ -44,7 +43,7 @@ public abstract class ChatScreenMixin extends Screen {
 		}
 	}
 	
-	@Inject(at = @At("HEAD"), method = "onClose")
+	@Inject(at = @At("HEAD"), method = "removed")
 	private void onChatClose(CallbackInfo ci) {
 		// Сворачиваем развернутые сообщения при закрытии чата
 		YapChatHud hud = YapChatModClient.getHud();

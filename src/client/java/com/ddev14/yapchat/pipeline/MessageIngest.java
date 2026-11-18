@@ -33,7 +33,7 @@ public final class MessageIngest {
 	public static boolean onPlayerChat(YapChatHud hud, Component message, PlayerChatMessage signed,
 			GameProfile sender, ChatType.Bound params) {
 		String chatTypeId = params == null ? null
-				: params.chatType().unwrapKey().map(k -> k.identifier().toString()).orElse(null);
+				: params.chatType().unwrapKey().map(k -> k.location().toString()).orElse(null);
 		Component body = null;
 		if (signed != null) {
 			body = signed.unsignedContent() != null ? signed.unsignedContent() : signed.decoratedContent();
@@ -112,7 +112,7 @@ public final class MessageIngest {
 		String localName = mc.player != null ? com.ddev14.yapchat.compat.Compat.name(mc.player.getGameProfile()) : mc.getUser().getName();
 		MessageClassifier.Context ctx = new MessageClassifier.Context(
 				localName,
-				name -> connection != null && connection.getPlayerInfoIgnoreCase(name) != null,
+				name -> connection != null && PlayerInfoLookup.getPlayerInfoByName(name) != null,
 				hud.getServerPatterns());
 		return MessageClassifier.classify(in, ctx);
 	}

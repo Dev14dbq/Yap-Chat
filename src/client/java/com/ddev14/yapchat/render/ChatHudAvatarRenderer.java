@@ -8,7 +8,7 @@ import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import com.ddev14.yapchat.compat.Argb;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -28,14 +28,14 @@ public final class ChatHudAvatarRenderer {
 		}
 
 		try {
-			Identifier skinLocation = com.ddev14.yapchat.compat.Compat.skin(owner);
+			ResourceLocation skinLocation = com.ddev14.yapchat.compat.Compat.skin(owner);
 			int color = Argb.white(opacity);
 
 			ClientLevel level = Minecraft.getInstance().level;
 			Player player = level != null ? level.getPlayerByUUID(com.ddev14.yapchat.compat.Compat.uuid(owner.getProfile())) : null;
 			boolean upsideDown = player != null && com.ddev14.yapchat.compat.Compat.upsideDown(player);
 
-			boolean showHat = owner.showHat();
+			boolean showHat = player == null || com.ddev14.yapchat.compat.Compat.showHat(player);
 
 			int yOffset = (upsideDown ? 8 : 0);
 			int yDirection = (upsideDown ? -1 : 1);
@@ -79,7 +79,7 @@ public final class ChatHudAvatarRenderer {
 	}
 
 	public static void renderDefaultSteveHead(Gfx guiGraphics, int x, int y, float opacity) {
-		Identifier steveSkin = com.ddev14.yapchat.compat.Compat.id("yap-chat", "steve.png");
+		ResourceLocation steveSkin = com.ddev14.yapchat.compat.Compat.id("yap-chat", "steve.png");
 		int color = Argb.white(opacity);
 		int av = ChatLayout.AVATAR_SIZE;
 
@@ -148,7 +148,7 @@ public final class ChatHudAvatarRenderer {
 	}
 
 	public static void renderCameraIcon(Gfx guiGraphics, int x, int y, float alpha) {
-		Identifier cameraTexture = com.ddev14.yapchat.compat.Compat.id("yap-chat", "camera.png");
+		ResourceLocation cameraTexture = com.ddev14.yapchat.compat.Compat.id("yap-chat", "camera.png");
 		int color = Argb.white(alpha);
 		int av = ChatLayout.AVATAR_SIZE;
 		guiGraphics.blit(cameraTexture, x, y,

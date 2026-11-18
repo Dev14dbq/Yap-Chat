@@ -5,7 +5,7 @@ import net.minecraft.client.gui.Font;
 import com.ddev14.yapchat.compat.Gfx;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -207,7 +207,7 @@ public final class Popovers {
 			if (q.isEmpty()) {
 				for (String s : SUGGESTED) out.add("minecraft:" + s);
 			} else {
-				for (Identifier id : com.ddev14.yapchat.compat.Compat.itemIds()) {
+				for (ResourceLocation id : com.ddev14.yapchat.compat.Compat.itemIds()) {
 					String full = id.toString();
 					if (full.contains(q) && com.ddev14.yapchat.compat.Compat.item(id) != Items.AIR) out.add(full);
 				}

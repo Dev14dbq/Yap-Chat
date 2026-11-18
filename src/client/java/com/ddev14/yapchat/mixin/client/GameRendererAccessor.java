@@ -9,5 +9,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(GameRenderer.class)
 public interface GameRendererAccessor {
 	@Invoker("getFov")
-	float yapchat$getFov(Camera camera, float partialTick, boolean useFovSetting);
+	double yapchat$getFov(Camera camera, float partialTick, boolean useFovSetting);
 }

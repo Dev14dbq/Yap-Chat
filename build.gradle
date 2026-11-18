@@ -116,22 +116,31 @@ test {
 	}
 }
 
-// ── In-game tests ──────────────────────────────────────────────────────────
-// ./gradlew runClientGameTest starts a real client, creates a world, sends messages of
-// every kind and checks how Yap Chat classified them (src/gametest).
-fabricApi {
-	configureTests {
-		createSourceSet = true
-		modId = "yap-chat-gametest"
-		enableGameTests = false
-		enableClientGameTests = true
-		eula = true
+// ── In-game check ──────────────────────────────────────────────────────────
+// Minecraft 1.21.1 has no Fabric client gametest API. ./gradlew runAutotest starts a dev client
+// with a small driver (src/autotest, not part of the mod jar) that creates a world, sends every
+// kind of message, checks the classification, takes screenshots (run-autotest/screenshots) and quits.
+sourceSets {
+	autotest {
+		compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output + sourceSets.client.compileClasspath + sourceSets.client.output
+		runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output + sourceSets.client.runtimeClasspath + sourceSets.client.output
 	}
 }
 
-sourceSets {
-	gametest {
-		compileClasspath += sourceSets.client.output
-		runtimeClasspath += sourceSets.client.output
+loom {
+	mods {
+		"yap-chat-autotest" {
+			sourceSet sourceSets.autotest
+		}
+	}
+	runs {
+		autotest {
+			client()
+			name "Autotest"
+			source sourceSets.autotest
+			runDir "run-autotest"
+			vmArg "-Dyap.autotest=1"
+			vmArg "-Dnet.minecraft.realms.realmsclient.com.mojang=localhost"
+		}
 	}
 }

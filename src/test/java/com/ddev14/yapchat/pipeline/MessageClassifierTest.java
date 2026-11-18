@@ -51,7 +51,7 @@ class MessageClassifierTest {
 	private static MutableComponent vanillaName(String name) {
 		return Component.literal(name).setStyle(Style.EMPTY
 				.withInsertion(name)
-				.withClickEvent(new ClickEvent.SuggestCommand("/tell " + name + " ")));
+				.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tell " + name + " ")));
 	}
 
 	private static Component red(String text) {
@@ -267,7 +267,7 @@ class MessageClassifierTest {
 			Component c = Component.literal("§7[§cSteve §7-> §cme§7] ")
 					.append(Component.literal("click me").withStyle(Style.EMPTY
 							.withColor(ChatFormatting.AQUA)
-							.withClickEvent(new ClickEvent.RunCommand("/spawn"))));
+							.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/spawn"))));
 			ClassifiedMessage m = system(c);
 			assertEquals(MessageType.WHISPER, m.type());
 			assertEquals("Steve", m.senderName());
@@ -278,7 +278,7 @@ class MessageClassifierTest {
 				return java.util.Optional.empty();
 			}, Style.EMPTY);
 			assertEquals(TextColor.fromLegacyFormat(ChatFormatting.AQUA), bodyStyle[0].getColor());
-			assertInstanceOf(ClickEvent.RunCommand.class, bodyStyle[0].getClickEvent());
+			assertEquals(ClickEvent.Action.RUN_COMMAND, bodyStyle[0].getClickEvent().getAction());
 		}
 
 		@Test
