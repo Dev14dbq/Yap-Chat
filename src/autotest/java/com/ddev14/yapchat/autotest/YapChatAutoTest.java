@@ -58,6 +58,12 @@ public class YapChatAutoTest implements ClientModInitializer {
 		}
 	}
 
+	private static boolean skipToTitle() {
+		LOG.info("AUTOTEST skipping first-run screen {}", mc().screen);
+		Compat.setScreen(new TitleScreen());
+		return true;
+	}
+
 	private void then(Runnable r) { steps.add(() -> { r.run(); return true; }); }
 	private void until(BooleanSupplier c) { steps.add(c); }
 	private void sleep(int ticks) { steps.add(() -> { wait = ticks; return true; }); }
@@ -81,7 +87,9 @@ public class YapChatAutoTest implements ClientModInitializer {
 	}
 
 	private void build() {
-		until(() -> mc().screen instanceof TitleScreen);
+		// title screen; first-run screens (accessibility onboarding etc.) are skipped after a while
+		int[] waited = {0};
+		until(() -> mc().screen instanceof TitleScreen || (mc().getOverlay() == null && ++waited[0] > 200 && skipToTitle()));
 		then(() -> mc().options.pauseOnLostFocus = false);
 		sleep(40);
 		// settings from the title screen (as from Mod Menu): no world yet

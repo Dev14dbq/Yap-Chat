@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +17,7 @@ import java.util.List;
 /**
  * The drawing calls Yap Chat uses, in one place. Each Minecraft version has its own
  * implementation of this class; the rest of the mod only talks to it.
- * (Minecraft 1.21.1: GuiGraphics with a 3D pose stack; tints go through the shader color.)
+ * (Minecraft 1.21.4: GuiGraphics with a 3D pose stack and render-type functions.)
  */
 public final class Gfx {
 	public final GuiGraphics raw;
@@ -94,9 +95,7 @@ public final class Gfx {
 	public void blit(ResourceLocation tex, int x, int y, float u, float v, int w, int h, int regionW, int regionH,
 			int texW, int texH, int color) {
 		if (Argb.alpha(color) == 0) return;
-		tint(color);
-		raw.blit(tex, x, y, w, h, u, v, regionW, regionH, texW, texH);
-		untint();
+		raw.blit(RenderType::guiTextured, tex, x, y, u, v, w, h, regionW, regionH, texW, texH, color);
 	}
 
 	public void blit(ResourceLocation tex, int x, int y, float u, float v, int w, int h, int texW, int texH, int color) {
@@ -106,9 +105,7 @@ public final class Gfx {
 	/** GUI sprite (textures/gui/sprites/...), nine-sliced or stretched as its .mcmeta says. */
 	public void blitSprite(ResourceLocation sprite, int x, int y, int w, int h, int color) {
 		if (Argb.alpha(color) == 0) return;
-		tint(color);
-		raw.blitSprite(sprite, x, y, w, h);
-		untint();
+		raw.blitSprite(RenderType::guiTextured, sprite, x, y, w, h, color);
 	}
 
 	public void item(ItemStack stack, int x, int y) {

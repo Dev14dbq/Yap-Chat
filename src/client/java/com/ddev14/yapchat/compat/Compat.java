@@ -24,7 +24,7 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.UUID;
 
-/** Small game calls whose names differ between Minecraft versions (this file: 1.21.1). */
+/** Small game calls whose names differ between Minecraft versions (this file: 1.21.4). */
 public final class Compat {
 	private Compat() {}
 
@@ -54,7 +54,7 @@ public final class Compat {
 	}
 
 	public static Item item(ResourceLocation id) {
-		return BuiltInRegistries.ITEM.get(id);
+		return BuiltInRegistries.ITEM.getValue(id);
 	}
 
 	public static ResourceLocation itemId(Item item) {
@@ -107,7 +107,7 @@ public final class Compat {
 	public static float[] project(Vec3 world, float partialTick, int screenW, int screenH) {
 		Minecraft mc = Minecraft.getInstance();
 		Camera cam = mc.gameRenderer.getMainCamera();
-		double fov = ((GameRendererAccessor) mc.gameRenderer).yapchat$getFov(cam, partialTick, true);
+		float fov = ((GameRendererAccessor) mc.gameRenderer).yapchat$getFov(cam, partialTick, true);
 		Matrix4f proj = mc.gameRenderer.getProjectionMatrix(fov);
 		Matrix4f view = new Matrix4f().rotation(cam.rotation().conjugate(new Quaternionf()));
 		Vec3 cp = cam.getPosition();
