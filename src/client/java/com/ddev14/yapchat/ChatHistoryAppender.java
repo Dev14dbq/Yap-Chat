@@ -137,6 +137,9 @@ public final class ChatHistoryAppender {
 			last.expandedMessages.add(last.copySingle());
 		}
 		last.expandedMessages.add(next);
+		// Same text, but the newest copy's click events win: a server may send a fresh,
+		// one-time action (an NPC choice) with every repeat of the prompt.
+		last.message = next.message;
 
 		if (last.senderInfo == null && next.senderInfo != null) {
 			last.updateSenderInfo(next.senderInfo);
