@@ -24,5 +24,7 @@
   "kkschat.time.night": "Ночь",
   "kkschat.time.midnight": "Полночь",
   "kkschat.time.sunrise": "Рассвет",
-  "kkschat.time.dawn": "Рассвет"
+  "kkschat.time.dawn": "Рассвет",
+  "kkschat.whisper.from": "Шепчет [%s]:",
+  "kkschat.whisper.to": "Вы прошептали [%s]:"
 }

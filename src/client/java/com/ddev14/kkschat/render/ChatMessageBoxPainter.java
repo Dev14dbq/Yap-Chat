@@ -8,6 +8,8 @@ import com.ddev14.kkschat.chat.MessageBounds;
 import com.ddev14.kkschat.chat.MessageType;
 import com.ddev14.kkschat.chat.RuleEngine;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -76,21 +78,8 @@ public final class ChatMessageBoxPainter {
 
 		int fullTextWidth = font.width(component);
 
-		boolean isWhisper = entry.isWhisper();
 		boolean isJoinMessage = entry.isJoinMessage();
-
-		boolean isShortWhisper = isWhisper
-				&& fullTextWidth < 150
-				&& component.getString().split("\n").length == 1;
-
-		int avatarAreaWidth;
-		if (isJoinMessage) {
-			avatarAreaWidth = 0;
-		} else if (isShortWhisper) {
-			avatarAreaWidth = ChatLayout.AVATAR_SIZE + 3 + 3 + 3 + ChatLayout.AVATAR_SIZE;
-		} else {
-			avatarAreaWidth = ChatLayout.AVATAR_SIZE;
-		}
+		int avatarAreaWidth = isJoinMessage ? 0 : ChatLayout.AVATAR_SIZE;
 
 		int leftNonText = isJoinMessage ? ChatLayout.HORIZONTAL_PADDING : (ChatLayout.HORIZONTAL_PADDING + avatarAreaWidth + 7);
 		int rightNonText = ChatLayout.HORIZONTAL_PADDING;
@@ -134,38 +123,8 @@ public final class ChatMessageBoxPainter {
 		if (entry.isCollapsed) {
 			ChatHudAvatarRenderer.renderClockIcon(guiGraphics, avatarX, avatarY, alpha);
 		} else if (!isJoinMessage) {
-			if (entry.senderInfo != null) {
-				ChatHudAvatarRenderer.renderPlayerHead(guiGraphics, avatarX, avatarY, entry.senderInfo, alpha);
-			} else if (entry.senderName != null) {
-				ChatHudAvatarRenderer.renderPlayerHeadByName(guiGraphics, avatarX, avatarY, entry.senderName, alpha);
-			} else {
-				// Icon: rule override takes priority over type-default config icon
-				KksChatHud hud = KksChatModClient.getHud();
-				if (entry.iconOverride != null) {
-					ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
-							entry.iconOverride, new net.minecraft.world.item.ItemStack(Items.STICK));
-				} else switch (entry.type) {
-				case CHALLENGE     -> ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
-						hud != null ? hud.getIconChallenge()    : null, new net.minecraft.world.item.ItemStack(Items.NETHERITE_INGOT));
-				case ACHIEVEMENT   -> ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
-						hud != null ? hud.getIconAchievement()  : null, new net.minecraft.world.item.ItemStack(Items.EMERALD));
-				case ERROR         -> ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
-						hud != null ? hud.getIconError()        : null, new net.minecraft.world.item.ItemStack(Items.BARRIER));
-				case SLEEP         -> ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
-						hud != null ? hud.getIconSleep()        : null, new net.minecraft.world.item.ItemStack(Items.BED.red()));
-				case SCREENSHOT    -> ChatHudAvatarRenderer.renderCameraIcon(guiGraphics, avatarX, avatarY, alpha);
-				case COMMAND_BLOCK -> ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
-						hud != null ? hud.getIconCommandBlock() : null, new net.minecraft.world.item.ItemStack(Items.COMMAND_BLOCK));
-				case WHISPER       -> ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
-						hud != null ? hud.getIconWhisper()      : null, new net.minecraft.world.item.ItemStack(Items.PAPER));
-				case JOIN_LEAVE    -> ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
-						hud != null ? hud.getIconJoinLeave()    : null, new net.minecraft.world.item.ItemStack(Items.OAK_DOOR));
-			default            -> ChatHudAvatarRenderer.renderIconById(guiGraphics, avatarX, avatarY, alpha,
-					hud != null ? hud.getIconSystem()       : null, new net.minecraft.world.item.ItemStack(Items.STICK));
-				}
-			}
+			renderAvatar(guiGraphics, entry, avatarX, avatarY, alpha);
 		}
-
 
 		int textX = textAreaStartX;
 		int totalTextHeight = font.lineHeight * lines.size();
@@ -225,5 +184,42 @@ public final class ChatMessageBoxPainter {
 			case ERROR       -> 0x1A0000;
 			default          -> 0x000000;
 		};
+	}
+
+	/**
+	 * Icon left of the message. Order: icon from a rule → the other player's head for
+	 * player chat and whispers → the configured icon of the message type.
+	 */
+	private static void renderAvatar(GuiGraphicsExtractor g, ChatMessageEntry entry, int x, int y, float alpha) {
+		KksChatHud hud = KksChatModClient.getHud();
+		if (entry.iconOverride != null) {
+			ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, entry.iconOverride, new ItemStack(Items.STICK));
+			return;
+		}
+		if (entry.type == MessageType.PLAYER_CHAT || entry.type == MessageType.WHISPER) {
+			boolean outgoingWhisper = entry.type == MessageType.WHISPER
+					&& entry.direction == com.ddev14.kkschat.pipeline.Direction.OUTGOING;
+			PlayerInfo info = outgoingWhisper ? entry.receiverInfo : entry.senderInfo;
+			String name = outgoingWhisper ? entry.receiverName : entry.senderName;
+			if (info != null) {
+				ChatHudAvatarRenderer.renderPlayerHead(g, x, y, info, alpha);
+				return;
+			}
+			if (name != null && !name.isEmpty()) {
+				ChatHudAvatarRenderer.renderPlayerHeadByName(g, x, y, name, alpha);
+				return;
+			}
+		}
+		switch (entry.type) {
+			case CHALLENGE     -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconChallenge() : null, new ItemStack(Items.NETHERITE_INGOT));
+			case ACHIEVEMENT   -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconAchievement() : null, new ItemStack(Items.EMERALD));
+			case ERROR         -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconError() : null, new ItemStack(Items.BARRIER));
+			case SLEEP         -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconSleep() : null, new ItemStack(Items.BED.red()));
+			case SCREENSHOT    -> ChatHudAvatarRenderer.renderCameraIcon(g, x, y, alpha);
+			case COMMAND_BLOCK -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconCommandBlock() : null, new ItemStack(Items.COMMAND_BLOCK));
+			case WHISPER       -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconWhisper() : null, new ItemStack(Items.PAPER));
+			case JOIN_LEAVE    -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconJoinLeave() : null, new ItemStack(Items.OAK_DOOR));
+			default            -> ChatHudAvatarRenderer.renderIconById(g, x, y, alpha, hud != null ? hud.getIconSystem() : null, new ItemStack(Items.STICK));
+		}
 	}
 }

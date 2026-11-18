@@ -27,20 +27,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class KksChatHud {
 
-	static final String DEFAULT_PLAYER_NAME = "DDev14";
-
-	// Full, styled chat line as Component (supports colors, hover, etc.)
-	// Эти поля используются для отображения последнего сообщения, когда чат закрыт
-	Component messageComponent;
-	PlayerInfo senderInfo;    // for head rendering (player messages)
-	// firstMessageTime – когда этот блок сообщения впервые показался (для анимации появления)
-	// lastMessageTime  – когда последнее событие (сообщение/повтор) было получено (для таймера скрытия)
-	// Эти поля используются для анимации и таймера скрытия последнего сообщения
-	// В данный момент используются только для очистки, но могут быть использованы для будущего функционала
-	@SuppressWarnings("unused")
-	long firstMessageTime;
-	@SuppressWarnings("unused")
-	long lastMessageTime;
+	// Server/plugin message formats from the config (tried before the built-in ones)
+	final List<com.ddev14.kkschat.pipeline.ServerPattern> serverPatterns = new ArrayList<>();
+	// Same patterns as written in the config, kept to save them back unchanged
+	final List<com.ddev14.kkschat.pipeline.ServerPattern.Config> serverPatternConfigs = new ArrayList<>();
 
 	// История сообщений для отображения когда чат открыт
 	final List<ChatMessageEntry> messageHistory = new ArrayList<>();
@@ -124,46 +114,35 @@ public class KksChatHud {
 	// Хранит состояние развернутости сжатых сообщений
 	boolean collapsedMessagesExpanded = false;
 
-	/**
-	 * Добавляет сообщение в историю чата.
-	 * Возвращает ChatMessageEntry для возможности обновления PlayerInfo позже.
-	 */
-	ChatMessageEntry addToHistory(Component message, PlayerInfo senderInfo,
-			com.ddev14.kkschat.chat.MessageType type, String senderName) {
-		return ChatHistoryAppender.addLine(this, message, senderInfo, null, type, senderName);
+	/** Stores a classified message in the history. Called by {@link com.ddev14.kkschat.pipeline.MessageIngest}. */
+	public void addMessage(com.ddev14.kkschat.pipeline.ClassifiedMessage msg, Component display,
+			PlayerInfo senderInfo, PlayerInfo receiverInfo) {
+		ChatMessageEntry entry = ChatHistoryAppender.addLine(this, display, senderInfo, receiverInfo,
+				msg.type(), msg.senderName());
+		if (entry != null && entry.repeatCount == 1) {
+			entry.direction = msg.direction();
+			entry.receiverName = msg.receiverName();
+			if (entry.senderUUID == null) entry.senderUUID = msg.senderId();
+		}
 	}
 
-	/**
-	 * Добавляет whisper сообщение в историю чата.
-	 * Возвращает ChatMessageEntry для возможности обновления PlayerInfo позже.
-	 */
-	ChatMessageEntry addToHistoryWhisper(Component message, PlayerInfo senderInfo, PlayerInfo receiverInfo, String senderName) {
-		return ChatHistoryAppender.addLine(this, message, senderInfo, receiverInfo,
-				com.ddev14.kkschat.chat.MessageType.WHISPER, senderName);
+	/** Read-only copy of the history, oldest first (used by tests and integrations). */
+	public List<ChatMessageEntry> getHistorySnapshot() {
+		return List.copyOf(messageHistory);
+	}
+
+	public List<com.ddev14.kkschat.pipeline.ServerPattern> getServerPatterns() {
+		return serverPatterns;
 	}
 
 	public void clearChat() {
 		messageHistory.clear();
-		messageComponent = null;
-		senderInfo = null;
 		scrollOffset = 0;
 		messageBounds.clear();
 	}
 
 	private void updateMissingPlayerInfos(Minecraft minecraft) {
 		PlayerSkinUpdater.updateMissingPlayerInfos(minecraft, messageHistory);
-	}
-
-	public void onPlayerMessage(Component component, GameProfile sender) {
-		IncomingPlayerChatHandler.handle(this, component, sender);
-	}
-
-	void handleWhisperMessage(Component component, String raw) {
-		WhisperChatHandler.handleWhisper(this, component, raw);
-	}
-
-	public void onSystemMessage(Component component) {
-		SystemChatHandler.handle(this, component);
 	}
 
 	/**

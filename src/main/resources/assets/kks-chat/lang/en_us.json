@@ -24,5 +24,7 @@
   "kkschat.time.night": "Night",
   "kkschat.time.midnight": "Midnight",
   "kkschat.time.sunrise": "Sunrise",
-  "kkschat.time.dawn": "Dawn"
+  "kkschat.time.dawn": "Dawn",
+  "kkschat.whisper.from": "Whisper from [%s]:",
+  "kkschat.whisper.to": "Whisper to [%s]:"
 }
