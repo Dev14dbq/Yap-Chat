@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import net.fabricmc.loader.api.FabricLoader;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
 
 import com.google.gson.stream.JsonReader;
 import java.io.IOException;
@@ -234,7 +234,7 @@ final class YapChatConfig {
 
 			Files.writeString(CONFIG_PATH, cfg, StandardCharsets.UTF_8);
 		} catch (IOException e) {
-			LoggerFactory.getLogger("YapChatConfig").warn("Failed to save config", e);
+			LogManager.getLogger("YapChatConfig").warn("Failed to save config", e);
 		}
 	}
 
@@ -290,7 +290,7 @@ final class YapChatConfig {
 					try {
 						hud.serverPatterns.add(ServerPattern.compile(c));
 					} catch (IllegalArgumentException e) {
-						LoggerFactory.getLogger("YapChatConfig").warn("Ignoring server pattern {}: {}", c.id, e.getMessage());
+						LogManager.getLogger("YapChatConfig").warn("Ignoring server pattern {}: {}", c.id, e.getMessage());
 					}
 				}
 			}
@@ -308,7 +308,7 @@ final class YapChatConfig {
 				hud.bgColors.putAll(d.bgColors);
 			}
 		} catch (IOException e) {
-			LoggerFactory.getLogger("YapChatConfig").warn("Failed to load config", e);
+			LogManager.getLogger("YapChatConfig").warn("Failed to load config", e);
 		}
 	}
 }

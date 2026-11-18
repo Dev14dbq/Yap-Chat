@@ -19,13 +19,22 @@ repositories {
 	maven { url "https://maven.fabricmc.net/" }
 }
 
-loom {
-	splitEnvironmentSourceSets()
+// Minecraft 1.16.5 has no separate server jar, so Loom cannot split client and common code:
+// src/client is compiled together with src/main.
+sourceSets {
+	main {
+		java.srcDir "src/client/java"
+		resources.srcDir "src/client/resources"
+		// fabric-resource-loader for 1.16 reads only one root of a mod; in dev, keep classes and
+		// resources in one folder so the mod's assets load
+		output.resourcesDir = java.destinationDirectory
+	}
+}
 
+loom {
 	mods {
 		"yap-chat" {
 			sourceSet sourceSets.main
-			sourceSet sourceSets.client
 		}
 	}
 
@@ -97,8 +106,8 @@ publishing {
 // (message classification, component helpers).
 sourceSets {
 	test {
-		compileClasspath += sourceSets.client.output + sourceSets.client.compileClasspath
-		runtimeClasspath += sourceSets.client.output + sourceSets.client.runtimeClasspath
+		compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+		runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
 	}
 }
 
@@ -122,8 +131,9 @@ test {
 // kind of message, checks the classification, takes screenshots (run-autotest/screenshots) and quits.
 sourceSets {
 	autotest {
-		compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output + sourceSets.client.compileClasspath + sourceSets.client.output
-		runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output + sourceSets.client.runtimeClasspath + sourceSets.client.output
+		output.resourcesDir = java.destinationDirectory
+		compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+		runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
 	}
 }
 

@@ -13,8 +13,8 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.function.BooleanSupplier;
  * screenshots (run-autotest/screenshots) and quits. The result is the last "AUTOTEST" log line.
  */
 public class YapChatAutoTest implements ClientModInitializer {
-	static final Logger LOG = LoggerFactory.getLogger("yap-chat-autotest");
+	static final Logger LOG = LogManager.getLogger("yap-chat-autotest");
 
 	private record Expect(String what, String command, boolean chat, MessageType type, Direction direction, String contains) {}
 

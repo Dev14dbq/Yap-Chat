@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/** Small game calls whose names differ between Minecraft versions (this file: 1.18.2). */
+/** Small game calls whose names differ between Minecraft versions (this file: 1.16.5). */
 public final class Compat {
 	private Compat() {}
 
@@ -80,7 +80,9 @@ public final class Compat {
 	}
 
 	public static boolean upsideDown(Player player) {
-		return LivingEntityRenderer.isEntityUpsideDown(player);
+		String n = net.minecraft.ChatFormatting.stripFormatting(player.getName().getString());
+		return ("Dinnerbone".equals(n) || "Grumm".equals(n))
+				&& player.isModelPartShown(net.minecraft.world.entity.player.PlayerModelPart.CAPE);
 	}
 
 	/** The vanilla chat options (shown on our Minecraft tab). */

@@ -9,18 +9,18 @@ import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 
 import java.lang.reflect.Method;
 
-/** Version-specific bits of the dev autotest (this file: 1.18.2). */
+/** Version-specific bits of the dev autotest (this file: 1.16.5). */
 final class AutoTestCompat {
 	private AutoTestCompat() {}
 
 	static void screenshot(String name) {
 		Minecraft mc = Minecraft.getInstance();
-		Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), c -> YapChatAutoTest.LOG.info("shot {}", name));
+		Screenshot.grab(mc.gameDirectory, name + ".png", mc.getWindow().getWidth(), mc.getWindow().getHeight(), mc.getMainRenderTarget(), c -> YapChatAutoTest.LOG.info("shot {}", name));
 	}
 
 	static void createWorld() {
 		Minecraft mc = Minecraft.getInstance();
-		mc.setScreen(CreateWorldScreen.createFresh(mc.screen));
+		mc.setScreen(CreateWorldScreen.create(mc.screen));
 		mc.execute(() -> {
 			try {
 				CreateWorldScreen s = (CreateWorldScreen) mc.screen;

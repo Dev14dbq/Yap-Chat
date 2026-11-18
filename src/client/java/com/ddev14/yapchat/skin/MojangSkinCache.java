@@ -51,7 +51,7 @@ public final class MojangSkinCache {
 
 					HttpResponse<String> uuidResponse = HTTP_CLIENT.send(uuidRequest, HttpResponse.BodyHandlers.ofString());
 					if (uuidResponse.statusCode() == 200) {
-						JsonObject profile = JsonParser.parseString(uuidResponse.body()).getAsJsonObject();
+						JsonObject profile = new JsonParser().parse(uuidResponse.body()).getAsJsonObject();
 						String uuidString = profile.get("id").getAsString();
 						uuid = UUID.fromString(uuidString.replaceFirst(
 								"(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
@@ -73,7 +73,7 @@ public final class MojangSkinCache {
 
 				HttpResponse<String> profileResponse = HTTP_CLIENT.send(profileRequest, HttpResponse.BodyHandlers.ofString());
 				if (profileResponse.statusCode() == 200) {
-					JsonObject profile = JsonParser.parseString(profileResponse.body()).getAsJsonObject();
+					JsonObject profile = new JsonParser().parse(profileResponse.body()).getAsJsonObject();
 					JsonArray properties = profile.getAsJsonArray("properties");
 
 					if (properties != null) {
@@ -82,7 +82,7 @@ public final class MojangSkinCache {
 							if ("textures".equals(property.get("name").getAsString())) {
 								String value = property.get("value").getAsString();
 								String decoded = new String(Base64.getDecoder().decode(value));
-								JsonObject textures = JsonParser.parseString(decoded).getAsJsonObject();
+								JsonObject textures = new JsonParser().parse(decoded).getAsJsonObject();
 
 								if (textures.has("textures")) {
 									JsonObject texturesObj = textures.getAsJsonObject("textures");

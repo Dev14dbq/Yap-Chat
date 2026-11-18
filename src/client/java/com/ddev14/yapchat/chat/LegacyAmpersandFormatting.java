@@ -43,8 +43,8 @@ public final class LegacyAmpersandFormatting {
 							case BOLD -> style = style.withBold(true);
 							case ITALIC -> style = style.withItalic(true);
 							case UNDERLINE -> style = style.withUnderlined(true);
-							case STRIKETHROUGH -> style = style.withStrikethrough(true);
-							case OBFUSCATED -> style = style.withObfuscated(true);
+							case STRIKETHROUGH -> style = style.applyFormat(net.minecraft.ChatFormatting.STRIKETHROUGH);
+							case OBFUSCATED -> style = style.applyFormat(net.minecraft.ChatFormatting.OBFUSCATED);
 							default -> {
 							}
 						}
@@ -122,8 +122,8 @@ public final class LegacyAmpersandFormatting {
 							case BOLD -> style = style.withBold(true);
 							case ITALIC -> style = style.withItalic(true);
 							case UNDERLINE -> style = style.withUnderlined(true);
-							case STRIKETHROUGH -> style = style.withStrikethrough(true);
-							case OBFUSCATED -> style = style.withObfuscated(true);
+							case STRIKETHROUGH -> style = style.applyFormat(net.minecraft.ChatFormatting.STRIKETHROUGH);
+							case OBFUSCATED -> style = style.applyFormat(net.minecraft.ChatFormatting.OBFUSCATED);
 							default -> {
 							}
 						}
@@ -170,8 +170,8 @@ public final class LegacyAmpersandFormatting {
 							case BOLD -> style = style.withBold(true);
 							case ITALIC -> style = style.withItalic(true);
 							case UNDERLINE -> style = style.withUnderlined(true);
-							case STRIKETHROUGH -> style = style.withStrikethrough(true);
-							case OBFUSCATED -> style = style.withObfuscated(true);
+							case STRIKETHROUGH -> style = style.applyFormat(net.minecraft.ChatFormatting.STRIKETHROUGH);
+							case OBFUSCATED -> style = style.applyFormat(net.minecraft.ChatFormatting.OBFUSCATED);
 							default -> {
 							}
 						}
@@ -226,8 +226,8 @@ public final class LegacyAmpersandFormatting {
 							case BOLD -> style = style.withBold(true);
 							case ITALIC -> style = style.withItalic(true);
 							case UNDERLINE -> style = style.withUnderlined(true);
-							case STRIKETHROUGH -> style = style.withStrikethrough(true);
-							case OBFUSCATED -> style = style.withObfuscated(true);
+							case STRIKETHROUGH -> style = style.applyFormat(net.minecraft.ChatFormatting.STRIKETHROUGH);
+							case OBFUSCATED -> style = style.applyFormat(net.minecraft.ChatFormatting.OBFUSCATED);
 							default -> {
 							}
 						}

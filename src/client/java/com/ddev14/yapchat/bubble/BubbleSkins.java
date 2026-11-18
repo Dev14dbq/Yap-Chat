@@ -7,8 +7,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.Reader;
 import java.util.EnumMap;
@@ -27,7 +27,7 @@ import java.util.Optional;
  * {@code <style>} is dark, white, tooltip or nametag.
  */
 public final class BubbleSkins implements SimpleSynchronousResourceReloadListener {
-	private static final Logger LOG = LoggerFactory.getLogger("yap-chat");
+	private static final Logger LOG = LogManager.getLogger("yap-chat");
 	public static final BubbleSkins INSTANCE = new BubbleSkins();
 
 	/** Everything needed to draw one style. */
@@ -61,7 +61,7 @@ public final class BubbleSkins implements SimpleSynchronousResourceReloadListene
 		java.io.InputStream res = com.ddev14.yapchat.compat.Compat.open(json);
 		if (res != null) {
 			try (Reader r = new java.io.InputStreamReader(res, java.nio.charset.StandardCharsets.UTF_8)) {
-				o = JsonParser.parseReader(r).getAsJsonObject();
+				o = new JsonParser().parse(r).getAsJsonObject();
 			} catch (Exception e) {
 				LOG.warn("Bad bubble style file {}: {}", json, e.getMessage());
 			}

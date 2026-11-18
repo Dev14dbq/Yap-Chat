@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +21,7 @@ import java.util.List;
 /**
  * The drawing calls Yap Chat uses, in one place. Each Minecraft version has its own
  * implementation of this class; the rest of the mod only talks to it.
- * (Minecraft 1.18.2: no GuiGraphics yet — PoseStack plus GuiComponent/Font/ItemRenderer calls;
+ * (Minecraft 1.16.5: no GuiGraphics yet — PoseStack plus GuiComponent/Font/ItemRenderer calls;
  * tints go through the shader color; sprites are nine-sliced by {@link NineSlice}.)
  */
 public final class Gfx {
@@ -100,14 +99,13 @@ public final class Gfx {
 	public void blit(ResourceLocation tex, int x, int y, float u, float v, int w, int h, int regionW, int regionH,
 			int texW, int texH, int color) {
 		if (Argb.alpha(color) == 0) return;
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		RenderSystem.setShaderTexture(0, tex);
+		mc().getTextureManager().bind(tex);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.setShaderColor(((color >> 16) & 0xFF) / 255f, ((color >> 8) & 0xFF) / 255f,
+		RenderSystem.color4f(((color >> 16) & 0xFF) / 255f, ((color >> 8) & 0xFF) / 255f,
 				(color & 0xFF) / 255f, Argb.alpha(color) / 255f);
 		GuiComponent.blit(raw, x, y, w, h, u, v, regionW, regionH, texW, texH);
-		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+		RenderSystem.color4f(1f, 1f, 1f, 1f);
 	}
 
 	public void blit(ResourceLocation tex, int x, int y, float u, float v, int w, int h, int texW, int texH, int color) {
@@ -122,13 +120,10 @@ public final class Gfx {
 
 	/** Items are drawn through the model-view stack here, so our pose is applied to it. */
 	public void item(ItemStack stack, int x, int y) {
-		PoseStack mv = RenderSystem.getModelViewStack();
-		mv.pushPose();
-		mv.mulPoseMatrix(raw.last().pose());
-		RenderSystem.applyModelViewMatrix();
+		RenderSystem.pushMatrix();
+		RenderSystem.multMatrix(raw.last().pose());
 		mc().getItemRenderer().renderGuiItem(stack, x, y);
-		mv.popPose();
-		RenderSystem.applyModelViewMatrix();
+		RenderSystem.popMatrix();
 	}
 
 	public void enableScissor(int x1, int y1, int x2, int y2) {

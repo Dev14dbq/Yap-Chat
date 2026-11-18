@@ -339,8 +339,7 @@ public class YapChatSettingsScreen extends Screen {
 	// ── Vanilla chat options, drawn with our controls ────────────────────────
 
 	/**
-	 * Before 1.19 vanilla options are Option objects (slider or cycle). A cycle option is driven
-	 * through its own vanilla CycleButton (kept off-screen), which knows the values and saves them.
+	 * Before 1.19 vanilla options are Option objects: slider, on/off or cycle.
 	 */
 	private Row vanillaRow(net.minecraft.client.Option opt) {
 		net.minecraft.client.Options options = minecraft.options;
@@ -353,18 +352,16 @@ public class YapChatSettingsScreen extends Screen {
 					v -> p.set(options, p.toValue(v / 1000.0)),
 					v -> valueText(message.get(), com.ddev14.yapchat.compat.Texts.empty()).getString());
 			((Slider) control).reserveValue(64);
-		} else if (opt.createButton(options, 0, 0, 150) instanceof net.minecraft.client.gui.components.CycleButton<?> b) {
-			message = b::getMessage;
-			if (b.getValue() instanceof Boolean) {
-				control = new Toggle(() -> (Boolean) b.getValue(), v -> {
-					if (v != (Boolean) b.getValue()) b.onPress();
-				});
-			} else {
-				// the button can only step forward; both arrows step
-				control = new Choice<Integer>(List.of(-1, 0, 1), () -> 0, v -> {
-					if (v != 0) b.onPress();
-				}, v -> valueText(b.getMessage(), com.ddev14.yapchat.compat.Texts.empty()));
-			}
+		} else if (opt instanceof net.minecraft.client.BooleanOption b) {
+			message = () -> b.getMessage(options);
+			control = new Toggle(() -> b.get(options), v -> {
+				if (v != b.get(options)) b.toggle(options);
+			});
+		} else if (opt instanceof net.minecraft.client.CycleOption c) {
+			message = () -> c.getMessage(options);
+			control = new Choice<Integer>(List.of(-1, 0, 1), () -> 0, v -> {
+				if (v != 0) c.toggle(options, v);
+			}, v -> valueText(c.getMessage(options), com.ddev14.yapchat.compat.Texts.empty()));
 		} else {
 			return null;
 		}

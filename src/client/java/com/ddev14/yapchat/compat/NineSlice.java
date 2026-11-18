@@ -53,7 +53,7 @@ public final class NineSlice {
 		InputStream meta = Compat.open(Compat.id(tex.getNamespace(), tex.getPath() + ".mcmeta"));
 		if (meta != null) {
 			try (Reader reader = new InputStreamReader(meta, StandardCharsets.UTF_8)) {
-				JsonObject scaling = JsonParser.parseReader(reader).getAsJsonObject()
+				JsonObject scaling = new JsonParser().parse(reader).getAsJsonObject()
 						.getAsJsonObject("gui").getAsJsonObject("scaling");
 				if ("nine_slice".equals(scaling.get("type").getAsString())) {
 					// border is given in sprite units (the "width"/"height" of the sprite); scale to pixels
