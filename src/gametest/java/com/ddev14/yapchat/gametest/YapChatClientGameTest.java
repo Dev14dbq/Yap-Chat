@@ -148,6 +148,75 @@ public class YapChatClientGameTest implements FabricClientGameTest {
 			if (afterReset != 5) failures.add("FAIL Reset all by two clicks: show time is " + afterReset + ", expected 5");
 			ctx.runOnClient(mc -> mc.gui.setScreen(null));
 
+			// Clickable choices like Hypixel's NPC options: a click type the mod used to ignore
+			// (show_dialog), sent twice so the repeats are merged into one "x2" box.
+			String choice = "tellraw @a [\"\",{\"text\":\"Select an option: \",\"color\":\"yellow\"},"
+					+ "{\"text\":\"[Yeah]\",\"color\":\"green\",\"click_event\":{\"action\":\"show_dialog\",\"dialog\":\"minecraft:server_links\"}}]";
+			ctx.runOnClient(mc -> {
+				com.ddev14.yapchat.YapChatModClient.getHud().clearChat();
+				com.ddev14.yapchat.YapChatModClient.getHud().setAntiSpamEnabled(true);
+			});
+			sp.getServer().runCommand(choice);
+			sp.getServer().runCommand(choice);
+			sp.getConnection().waitForClientboundPackets();
+			ctx.runOnClient(mc -> mc.gui.setScreen(new net.minecraft.client.gui.screens.ChatScreen("", false)));
+			ctx.waitTicks(5);
+			double[] choicePos = ctx.computeOnClient(mc -> {
+				com.ddev14.yapchat.chat.MessageBounds b = com.ddev14.yapchat.YapChatModClient.getHud().lastMessageBounds();
+				if (b == null || !b.component.getString().contains("Select an option")) return null;
+				int x = b.textX + mc.font.width("Select an option: ") + mc.font.width("[Yeah]") / 2;
+				int y = b.textY + mc.font.lineHeight / 2;
+				double sc = mc.getWindow().getGuiScale();
+				return new double[] {x * sc, y * sc};
+			});
+			int repeats = history().get(history().size() - 1).repeatCount;
+			if (choicePos == null) {
+				failures.add("FAIL clickable choice: message was not drawn");
+			} else {
+				ctx.getInput().setCursorPos(choicePos[0], choicePos[1]);
+				ctx.waitTicks(2);
+				ctx.takeScreenshot("yap-chat-click-choice");
+				ctx.getInput().pressMouse(0);
+				ctx.waitTicks(5);
+				String opened = ctx.computeOnClient(mc -> mc.gui.screen() == null ? "none" : mc.gui.screen().getClass().getSimpleName());
+				LOG.info("Clickable choice (x{}): click opened {}", repeats, opened);
+				if (!opened.contains("Dialog")) failures.add("FAIL clickable choice (x" + repeats + "): click opened " + opened + ", expected a dialog");
+			}
+			ctx.runOnClient(mc -> mc.gui.setScreen(null));
+			ctx.waitTicks(2);
+
+			// Hover text on a message is shown (screenshot check).
+			sp.getServer().runCommand("tellraw @a [\"\",{\"text\":\"Hover me: \",\"color\":\"yellow\"},"
+					+ "{\"text\":\"[Stats]\",\"color\":\"aqua\",\"hover_event\":{\"action\":\"show_text\",\"value\":\"Hover text works\"}}]");
+			sp.getConnection().waitForClientboundPackets();
+			ctx.runOnClient(mc -> mc.gui.setScreen(new net.minecraft.client.gui.screens.ChatScreen("", false)));
+			ctx.waitTicks(5);
+			double[] hoverPos = ctx.computeOnClient(mc -> {
+				com.ddev14.yapchat.chat.MessageBounds b = com.ddev14.yapchat.YapChatModClient.getHud().lastMessageBounds();
+				if (b == null || !b.component.getString().contains("Hover me")) return null;
+				double sc = mc.getWindow().getGuiScale();
+				return new double[] {(b.textX + mc.font.width("Hover me: ") + 8) * sc, (b.textY + 4) * sc};
+			});
+			if (hoverPos == null) {
+				failures.add("FAIL hover text: message was not drawn");
+			} else {
+				ctx.getInput().setCursorPos(hoverPos[0], hoverPos[1]);
+				ctx.waitTicks(3);
+				ctx.takeScreenshot("yap-chat-hover-text");
+			}
+			ctx.runOnClient(mc -> mc.gui.setScreen(null));
+			ctx.waitTicks(2);
+
+			// Vanilla "Chat: Commands Only" hides player chat.
+			ctx.runOnClient(mc -> mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.SYSTEM));
+			ctx.runOnClient(mc -> mc.getConnection().sendChat("should stay hidden"));
+			sp.getConnection().waitForServerboundPackets();
+			sp.getConnection().waitForClientboundPackets();
+			ctx.waitTicks(3);
+			boolean leaked = history().stream().anyMatch(en -> en.message.getString().contains("should stay hidden"));
+			if (leaked) failures.add("FAIL chat visibility Commands Only: player chat was still shown");
+			ctx.runOnClient(mc -> mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.FULL));
+
 			// Vanilla "Chat Settings" must open our screen instead.
 			ctx.runOnClient(mc -> mc.gui.setScreen(new net.minecraft.client.gui.screens.options.ChatOptionsScreen(null, mc.options)));
 			ctx.waitTicks(3);
