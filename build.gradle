@@ -23,7 +23,7 @@ loom {
 	splitEnvironmentSourceSets()
 
 	mods {
-		"kks-chat" {
+		"yap-chat" {
 			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}
@@ -47,6 +47,7 @@ dependencies {
 
 	// Mod Menu (compileOnly: рантайм-jar уже лежит в run/mods)
 	compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+	localRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
 }
 
 processResources {
@@ -116,11 +117,11 @@ test {
 
 // ── In-game tests ──────────────────────────────────────────────────────────
 // ./gradlew runClientGameTest starts a real client, creates a world, sends messages of
-// every kind and checks how KKS Chat classified them (src/gametest).
+// every kind and checks how Yap Chat classified them (src/gametest).
 fabricApi {
 	configureTests {
 		createSourceSet = true
-		modId = "kks-chat-gametest"
+		modId = "yap-chat-gametest"
 		enableGameTests = false
 		enableClientGameTests = true
 		eula = true
