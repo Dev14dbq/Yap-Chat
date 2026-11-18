@@ -60,4 +60,34 @@ final class AutoTestCompat {
 		s.mouseClicked(pos[0], pos[1], 0);
 		s.mouseReleased(pos[0], pos[1], 0);
 	}
+
+	/** Click event JSON for tellraw (this version's key names). */
+	static String clickJson(String action, String value) {
+		return "\"clickEvent\":{\"action\":\"" + action + "\",\"value\":\"" + value + "\"}";
+	}
+
+	static String hoverTextJson(String text) {
+		return "\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\"" + text + "\"}";
+	}
+
+	/** Moves the real mouse cursor to a GUI position, so hover tooltips are drawn. */
+	static void moveMouse(int x, int y) {
+		Minecraft mc = Minecraft.getInstance();
+		double sc = mc.getWindow().getGuiScale();
+		// An unfocused window ignores glfwSetCursorPos on macOS, so set the game's own copy too
+		// (dev run only: the fields have their Mojang names here).
+		try {
+			for (String f : new String[] {"xpos", "ypos"}) {
+				java.lang.reflect.Field field = net.minecraft.client.MouseHandler.class.getDeclaredField(f);
+				field.setAccessible(true);
+				field.setDouble(mc.mouseHandler, (f.equals("xpos") ? x : y) * sc);
+			}
+		} catch (ReflectiveOperationException e) {
+			org.lwjgl.glfw.GLFW.glfwSetCursorPos(mc.getWindow().getWindow(), x * sc, y * sc);
+		}
+	}
+
+	static void setChatVisibility(net.minecraft.world.entity.player.ChatVisiblity v) {
+		Minecraft.getInstance().options.chatVisibility = v;
+	}
 }

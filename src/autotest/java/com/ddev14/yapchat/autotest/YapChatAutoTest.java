@@ -35,6 +35,7 @@ public class YapChatAutoTest implements ClientModInitializer {
 	private final List<String> failures = new ArrayList<>();
 	private int step, wait, shots;
 	private int before;
+	private int[] hoverAt;
 
 	@Override
 	public void onInitializeClient() {
@@ -74,6 +75,15 @@ public class YapChatAutoTest implements ClientModInitializer {
 		sleep(2);
 	}
 
+	/** The settings screen on the title screen; reopened if something late (a title screen reload) replaced it. */
+	private static YapChatSettingsScreen titleSettings() {
+		if (!(mc().screen instanceof YapChatSettingsScreen)) {
+			LOG.info("AUTOTEST settings screen was replaced by {}, reopening", mc().screen);
+			Compat.setScreen(new YapChatSettingsScreen(mc().screen));
+		}
+		return (YapChatSettingsScreen) mc().screen;
+	}
+
 	private static Minecraft mc() { return Minecraft.getInstance(); }
 
 	private static List<ChatMessageEntry> history() {
@@ -88,10 +98,10 @@ public class YapChatAutoTest implements ClientModInitializer {
 		then(() -> Compat.setScreen(new YapChatSettingsScreen(mc().screen)));
 		for (int i = 0; i < 6; i++) {
 			final int tab = i;
-			then(() -> ((YapChatSettingsScreen) mc().screen).showTab(tab));
+			then(() -> titleSettings().showTab(tab));
 			sleep(5);
 		}
-		then(() -> ((YapChatSettingsScreen) mc().screen).showTab(0));
+		then(() -> titleSettings().showTab(0));
 		shot("settings-title");
 		then(() -> mc().screen.onClose());
 		sleep(5);
@@ -165,6 +175,78 @@ public class YapChatAutoTest implements ClientModInitializer {
 			shot("position-" + pos, false);
 		}
 		then(() -> YapChatModClient.getHud().setChatPosition(0));
+
+		// 1.3.3: a clickable button inside a repeated (x2) message is clicked, not the repeats expanded
+		then(() -> {
+			YapChatModClient.getHud().clearChat();
+			YapChatModClient.getHud().setAntiSpamEnabled(true);
+		});
+		for (int r = 0; r < 2; r++) {
+			then(() -> AutoTestCompat.sendCommand("tellraw @s [\"\",{\"text\":\"Select an option: \",\"color\":\"yellow\"},"
+					+ "{\"text\":\"[Yeah]\",\"color\":\"green\"," + AutoTestCompat.clickJson("run_command", "/tellraw @s \\\"choice clicked\\\"") + "}]"));
+			sleep(10);
+		}
+		then(() -> Compat.setScreen(new ChatScreen("")));
+		sleep(5);
+		then(() -> {
+			com.ddev14.yapchat.chat.MessageBounds b = YapChatModClient.getHud().lastMessageBounds();
+			int repeats = history().isEmpty() ? 0 : history().get(history().size() - 1).repeatCount;
+			if (b == null || !b.component.getString().contains("Select an option")) {
+				failures.add("clickable choice: message was not drawn");
+				return;
+			}
+			if (repeats != 2) failures.add("clickable choice: expected x2, got x" + repeats);
+			int x = b.textX + mc().font.width("Select an option: ") + mc().font.width("[Yeah]") / 2;
+			int y = b.textY + mc().font.lineHeight / 2;
+			AutoTestCompat.moveMouse(x, y);
+			AutoTestCompat.click(new int[] {x, y});
+		});
+		shot("click-choice");
+		sleep(10);
+		then(() -> {
+			boolean clicked = history().stream().anyMatch(en -> en.message.getString().contains("choice clicked"));
+			LOG.info("AUTOTEST {}  clickable choice in x2 message ran its command", clicked ? "OK  " : "FAIL");
+			if (!clicked) failures.add("clickable choice (x2): the click did not run the command");
+			Compat.setScreen(null);
+		});
+		sleep(2);
+
+		// hover text on a message
+		then(() -> AutoTestCompat.sendCommand("tellraw @s [\"\",{\"text\":\"Hover me: \",\"color\":\"yellow\"},"
+				+ "{\"text\":\"[Stats]\",\"color\":\"aqua\"," + AutoTestCompat.hoverTextJson("Hover text works") + "}]"));
+		sleep(10);
+		then(() -> Compat.setScreen(new ChatScreen("")));
+		sleep(5);
+		then(() -> {
+			com.ddev14.yapchat.chat.MessageBounds b = YapChatModClient.getHud().lastMessageBounds();
+			if (b == null || !b.component.getString().contains("Hover me")) {
+				failures.add("hover text: message was not drawn");
+				return;
+			}
+			int x = b.textX + mc().font.width("Hover me: ") + 8, y = b.textY + 4;
+			net.minecraft.network.chat.Style st = com.ddev14.yapchat.ChatHudClickDispatch.styleUnderMouse(YapChatModClient.getHud(), x, y);
+			if (st == null || st.getHoverEvent() == null) failures.add("hover text: no hover event under the mouse");
+			hoverAt = new int[] {x, y};
+		});
+		// the real cursor: keep putting it there (a moving system mouse would win otherwise)
+		for (int i = 0; i < 4; i++) {
+			then(() -> { if (hoverAt != null) AutoTestCompat.moveMouse(hoverAt[0], hoverAt[1]); });
+			sleep(1);
+		}
+		then(() -> AutoTestCompat.screenshot(String.format("%02d_%s", shots++, "hover-text")));
+		sleep(2);
+		then(() -> Compat.setScreen(null));
+		sleep(2);
+
+		// vanilla "Chat: Commands Only" hides player chat
+		then(() -> AutoTestCompat.setChatVisibility(net.minecraft.world.entity.player.ChatVisiblity.SYSTEM));
+		then(() -> AutoTestCompat.sendChat("should stay hidden"));
+		sleep(15);
+		then(() -> {
+			if (history().stream().anyMatch(en -> en.message.getString().contains("should stay hidden")))
+				failures.add("chat visibility Commands Only: player chat was still shown");
+			AutoTestCompat.setChatVisibility(net.minecraft.world.entity.player.ChatVisiblity.FULL);
+		});
 
 		// vanilla "Chat Settings" opens our screen
 		then(() -> Compat.setScreen(AutoTestCompat.vanillaChatOptions()));
