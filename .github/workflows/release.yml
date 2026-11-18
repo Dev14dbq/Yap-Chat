@@ -1,0 +1,150 @@
+# Publishing a GitHub release tagged vX.Y.Z builds every version branch whose
+# gradle.properties says mod_version=X.Y.Z, attaches the jars to the release and
+# uploads them to Modrinth. Branches still on another version are skipped, so a
+# fix can be released for only some Minecraft versions.
+#
+# Needs the repository secret MODRINTH_TOKEN (a Modrinth personal access token
+# with the "Create versions" scope). Without it only the GitHub release is filled.
+#
+# Re-running is safe: jars are replaced, Modrinth versions that already exist are kept.
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag, e.g. v1.3.4 (the release must already exist)
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+  MODRINTH_PROJECT: 2tjYaIWP
+
+jobs:
+  publish:
+    name: ${{ matrix.branch }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { branch: "26.3",    game_versions: '["26.3"]' }
+          - { branch: "26.2",    game_versions: '["26.2"]' }
+          - { branch: "26.1.2",  game_versions: '["26.1.2"]' }
+          - { branch: "26.1.1",  game_versions: '["26.1.1"]' }
+          - { branch: "26.1",    game_versions: '["26.1"]' }
+          - { branch: "1.21.11", game_versions: '["1.21.11"]' }
+          - { branch: "1.21.4",  game_versions: '["1.21.4"]' }
+          - { branch: "1.21.1",  game_versions: '["1.21", "1.21.1"]' }
+          - { branch: "1.20.1",  game_versions: '["1.20", "1.20.1"]' }
+          - { branch: "1.19.2",  game_versions: '["1.19.2"]' }
+          - { branch: "1.18.2",  game_versions: '["1.18.2"]' }
+          - { branch: "1.16.5",  game_versions: '["1.16.5"]' }
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Is this branch part of the release?
+        id: version
+        run: |
+          mod=$(grep -E '^mod_version=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')
+          mc=$(grep -E '^minecraft_version=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')
+          echo "mod=$mod" >> "$GITHUB_OUTPUT"
+          echo "mc=$mc" >> "$GITHUB_OUTPUT"
+          if [ "v$mod" = "$TAG" ]; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=${{ matrix.branch }} skipped::branch is at $mod, not ${TAG#v}"
+          fi
+
+      - uses: actions/setup-java@v6
+        if: steps.version.outputs.release == 'true'
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v6
+        if: steps.version.outputs.release == 'true'
+
+      - name: Build
+        if: steps.version.outputs.release == 'true'
+        run: |
+          ./gradlew build --stacktrace
+          jar="yap-chat-${{ steps.version.outputs.mod }}+mc${{ steps.version.outputs.mc }}.jar"
+          cp "build/libs/yap-chat-${{ steps.version.outputs.mod }}.jar" "$jar"
+          echo "JAR=$jar" >> "$GITHUB_ENV"
+
+      - name: Attach to the GitHub release
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" "$JAR" --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: Upload to Modrinth
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MOD_VERSION: ${{ steps.version.outputs.mod }}
+          MC_VERSION: ${{ steps.version.outputs.mc }}
+          GAME_VERSIONS: ${{ matrix.game_versions }}
+        run: |
+          if [ -z "$MODRINTH_TOKEN" ]; then
+            echo "::warning title=Modrinth skipped::MODRINTH_TOKEN secret is not set"
+            exit 0
+          fi
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body > changelog.md
+          python3 - <<'EOF'
+          import json, os, subprocess, sys, urllib.request, urllib.error
+
+          number = f"{os.environ['MOD_VERSION']}+mc{os.environ['MC_VERSION']}"
+          project = os.environ["MODRINTH_PROJECT"]
+          headers = {"User-Agent": "yap-chat-release-workflow"}
+
+          try:
+              urllib.request.urlopen(urllib.request.Request(
+                  f"https://api.modrinth.com/v2/project/{project}/version/{number}", headers=headers))
+              print(f"{number} is already on Modrinth, skipped")
+              sys.exit(0)
+          except urllib.error.HTTPError as e:
+              if e.code != 404:
+                  raise
+
+          data = {
+              "project_id": project,
+              "name": f"Yap Chat {os.environ['MOD_VERSION']}",
+              "version_number": number,
+              "changelog": open("changelog.md").read(),
+              "game_versions": json.loads(os.environ["GAME_VERSIONS"]),
+              "loaders": ["fabric"],
+              "version_type": "release",
+              "featured": True,
+              "status": "listed",
+              "dependencies": [
+                  {"project_id": "P7dR8mSH", "dependency_type": "required"},  # Fabric API
+                  {"project_id": "mOgUt4GM", "dependency_type": "optional"},  # Mod Menu
+              ],
+              "file_parts": ["file"],
+              "primary_file": "file",
+          }
+          r = subprocess.run(
+              ["curl", "-sS", "-w", "\n%{http_code}", "-X", "POST", "https://api.modrinth.com/v2/version",
+               "-H", "Authorization: " + os.environ["MODRINTH_TOKEN"],
+               "-H", "User-Agent: yap-chat-release-workflow",
+               "--form-string", "data=" + json.dumps(data),
+               "-F", f"file=@{os.environ['JAR']};type=application/java-archive"],
+              capture_output=True, text=True)
+          body, code = r.stdout.rsplit("\n", 1)
+          if code != "200":
+              print(f"Modrinth answered {code}: {body}")
+              sys.exit(1)
+          print(f"Uploaded {number} to Modrinth")
+          EOF

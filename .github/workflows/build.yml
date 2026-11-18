@@ -1,0 +1,63 @@
+# Builds the mod on every push and pull request, and runs the in-game tests
+# (src/gametest) where the branch has them. Each Minecraft version lives on its
+# own branch, and every branch carries this same file.
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      # One JDK builds every branch: older versions compile with `--release <n>`.
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Build
+        run: ./gradlew build --stacktrace
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v7
+        with:
+          name: yap-chat-${{ github.run_number }}
+          path: build/libs/*.jar
+          if-no-files-found: error
+
+      - name: Install a virtual display for the in-game tests
+        if: hashFiles('src/gametest/**') != ''
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -yq xvfb libgl1-mesa-dri libglx-mesa0
+
+      - name: In-game tests
+        if: hashFiles('src/gametest/**') != ''
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew runClientGameTest --stacktrace
+
+      - name: Upload test screenshots and logs
+        if: always() && hashFiles('src/gametest/**') != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: gametest-${{ github.run_number }}
+          path: |
+            build/run/clientGameTest/screenshots
+            build/run/clientGameTest/logs
+          if-no-files-found: ignore

@@ -110,6 +110,15 @@ Yap Chat used to be called KKS Chat; an old `config/kks-chat.json` is picked up 
 
 The jar is in `build/libs`. `./gradlew runClientGameTest` starts the game and checks how real messages are classified.
 
+Every push and pull request is built by GitHub Actions ([Build](.github/workflows/build.yml)), and the in-game tests run on the branches that have them.
+
+## Releasing
+
+1. On every version branch that gets the release, set `mod_version` in `gradle.properties` and push.
+2. Publish a GitHub release with the tag `v<mod_version>` (for example `v1.3.4`) and the changelog as its text.
+
+The [Release](.github/workflows/release.yml) workflow then builds each branch whose `mod_version` matches the tag, attaches the jars to the release and uploads them to Modrinth (needs the `MODRINTH_TOKEN` secret). Branches on another version are skipped. To run it again for an existing release: Actions → Release → Run workflow.
+
 ## Support
 
 Questions and ideas: Discord **ddev14**, or [open an issue](https://github.com/Dev14dbq/Yap-Chat/issues).
