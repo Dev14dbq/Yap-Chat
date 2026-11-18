@@ -1,0 +1,15 @@
+{
+  "minecraft:story/mine_stone": {
+    "criteria": {
+      "get_stone": "2026-11-18 05:43:47 +0300"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:wooded_hills": "2026-11-18 05:43:37 +0300"
+    },
+    "done": false
+  },
+  "DataVersion": 2586
+}

@@ -1,0 +1,127 @@
+{
+  // ── General ─────────────────────────────────────────────────────────
+  // Enable or disable Yap Chat entirely.
+  // When disabled, the vanilla Minecraft chat is used instead.
+  "enabled": true,
+
+  // Modify message text (stylization, reformatting).
+  // false = show every message exactly as the server sent it (types and icons still work).
+  "modifyMessageText": true,
+
+  // Suppress duplicate messages and merge them into one entry with a repeat counter.
+  "antiSpamEnabled": true,
+
+  // ── Appearance ───────────────────────────────────────────────────────
+  // Background opacity of message boxes (0.0 = fully transparent, 1.0 = fully opaque).
+  "backgroundOpacity": 0.3,
+
+  // Chat position on screen.
+  // 0 = center-bottom, 1 = center-top, 2 = left-top,
+  // 3 = left-bottom,   4 = right-top,  5 = right-bottom
+  "chatPosition": 0,
+
+  // ── History ──────────────────────────────────────────────────────────
+  // How long (in seconds) a message stays visible in the closed overlay.
+  "displayTimeSeconds": 5,
+
+  // Maximum number of messages stored in history.
+  "maxHistorySize": 100,
+
+  // Maximum number of messages visible at once when the chat is open.
+  "maxVisibleMessages": 10,
+
+  // ── Icons ────────────────────────────────────────────────────────────
+  // Item IDs for icons displayed next to each message type.
+  // Use any valid Minecraft item ID, e.g. "minecraft:diamond".
+  "iconSystem":       "minecraft:stick",
+  "iconError":        "minecraft:barrier",
+  "iconSleep":        "minecraft:red_bed",
+  "iconAchievement":  "minecraft:emerald",
+  "iconChallenge":    "minecraft:netherite_ingot",
+  "iconCommandBlock": "minecraft:command_block",
+  "iconWhisper":      "minecraft:paper",
+  "iconJoinLeave":    "minecraft:oak_door",
+
+  // ── Animation ────────────────────────────────────────────────────────
+  // Animation when a message appears (enter) and disappears (leave).
+  // Values: FADE, SLIDE_LEFT, SLIDE_RIGHT, SLIDE_UP, SLIDE_DOWN, BOUNCE, NONE
+  "animationIn":  "FADE",
+  "animationOut": "FADE",
+
+  // ── Background colors ─────────────────────────────────────────────────
+  // Background color per message type. Hex string, e.g. "#1A0028".
+  // Use "#000000" for the default black background.
+  "bgColors": {
+  "PLAYER_CHAT": "#000000",
+  "WHISPER": "#000000",
+  "JOIN_LEAVE": "#000000",
+  "ACHIEVEMENT": "#001A04",
+  "CHALLENGE": "#1A0028",
+  "ERROR": "#1A0000",
+  "SLEEP": "#000000",
+  "SCREENSHOT": "#000000",
+  "COMMAND_BLOCK": "#000000",
+  "SYSTEM": "#000000"
+},
+
+  // ── Chat bubbles ─────────────────────────────────────────────────────
+  // Show what players write in a bubble above their head.
+  "bubblesEnabled": true,
+  // Also show your own bubble (visible in third-person view).
+  "bubblesShowOwn": true,
+  // Seconds a bubble stays (2-20), max distance in blocks (4-64).
+  "bubbleSeconds": 6,
+  "bubbleDistance": 24,
+  // Bubble background opacity (0.0-1.0) and max text width in pixels (60-300).
+  "bubbleOpacity": 0.6,
+  "bubbleMaxWidth": 150,
+  // Bubble size in percent (50-200) and look: DARK, WHITE, TOOLTIP or NAMETAG.
+  "bubbleScale": 100,
+  "bubbleStyle": "DARK",
+  // Accent color of the settings screen.
+  "accentColor": "#E0564B",
+
+  // ── Server message formats ─────────────────────────────────────────────
+  // Teach Yap Chat the chat / private-message format of your server.
+  // Checked before the built-in formats (EssentialsX, CMI, Hypixel-style, vanilla).
+  // "regex" is matched against the whole visible message text. Named groups:
+  //   from / to — author / recipient of a private message ("me", "я" or your nick = you)
+  //   name      — author of a chat line (must be online) or player who joined/left
+  //   body      — the message itself
+  // "type" is a MessageType name (see Rules below).
+  //
+  // Example — "✉ Steve » you: hi":
+  //   { "id": "my-server-pm", "regex": "^✉ (?<from>\\w+) » (?<to>\\w+): (?<body>.*)$", "type": "WHISPER" }
+  "serverPatterns": [],
+
+  // ── Rules ────────────────────────────────────────────────────────────
+  // Rules are evaluated in order for every incoming message.
+  // Each rule has an "if" block (conditions) and a "then" block (actions).
+  //
+  // Conditions ("if"):
+  //   type        — MessageType name: PLAYER_CHAT, WHISPER, SYSTEM, ERROR, SLEEP,
+  //                  ACHIEVEMENT, CHALLENGE, COMMAND_BLOCK, JOIN_LEAVE, SCREENSHOT
+  //   contains    — text contains this string (case-sensitive)
+  //   startsWith  — text starts with this string
+  //   endsWith    — text ends with this string
+  //   regex       — full Java regex; first capture group becomes the matched fragment
+  //   matchType   — "ALL" (default, AND) or "ANY" (OR)
+  //
+  // Actions ("then"):
+  //   icon         — override icon (Minecraft item ID, e.g. "minecraft:diamond")
+  //   hide         — hide the message entirely (true/false)
+  //   noStyle      — disable stylization for this message (true/false)
+  //   displayTime  — override display time in seconds for this message
+  //   color        — tint the whole message (hex, e.g. "#FFD700")
+  //   replaceText  — replace the entire message text with this string
+  //   replaceMatch — replace the matched fragment (from contains/regex)
+  //   colorMatch   — color the matched fragment only (hex)
+  //   stopAfter    — stop processing further rules after this one (true/false)
+  //
+  // Example — hide command-block output:
+  //   { "if": { "type": "COMMAND_BLOCK" }, "then": { "hide": true } }
+  //
+  // Example — gold icon + color for VIP players:
+  //   { "if": { "contains": "[VIP]" }, "then": { "icon": "minecraft:gold_ingot", "colorMatch": "#FFD700" } }
+  "rules": []
+}
