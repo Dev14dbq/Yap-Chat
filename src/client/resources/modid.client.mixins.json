@@ -7,7 +7,6 @@
 		"ChatScreenMixin",
 		"ChatOptionsScreenMixin",
 		"ChatComponentMixin",
-		"ChatListenerMixin",
 		"MinecraftMixin"
 	],
 	"injectors": {

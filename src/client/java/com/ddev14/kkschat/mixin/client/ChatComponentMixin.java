@@ -1,6 +1,7 @@
 package com.ddev14.kkschat.mixin.client;
 
 import com.ddev14.kkschat.KksChatModClient;
+import com.ddev14.kkschat.pipeline.MessageIngest;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,31 +24,19 @@ public abstract class ChatComponentMixin {
 		KksChatModClient.getHud().clearChat();
 	}
 	
-	/**
-	 * Перехватывает клиентские системные сообщения (от модов и т.д.),
-	 * добавляемые напрямую в ChatComponent в 26.1+.
-	 */
+	/** Client-side messages (other mods, screenshots, debug keys). */
 	@Inject(method = "addClientSystemMessage", at = @At("HEAD"), cancellable = true)
 	private void kkschat$onAddClientSystemMessage(Component message, CallbackInfo ci) {
-		if (message != null && !message.getString().isEmpty()) {
-			KksChatModClient.getHud().onSystemMessage(message);
-			if (KksChatModClient.getHud().isEnabled()) {
-				ci.cancel();
-			}
+		if (MessageIngest.onClientSystemMessage(KksChatModClient.getHud(), message)) {
+			ci.cancel();
 		}
 	}
 
-	/**
-	 * Перехватывает серверные системные сообщения, добавляемые напрямую в ChatComponent в 26.1+.
-	 */
+	/** Server system messages that reach the chat without Fabric's ALLOW_GAME event. */
 	@Inject(method = "addServerSystemMessage", at = @At("HEAD"), cancellable = true)
 	private void kkschat$onAddServerSystemMessage(Component message, CallbackInfo ci) {
-		if (message != null && !message.getString().isEmpty()) {
-			KksChatModClient.getHud().onSystemMessage(message);
-			if (KksChatModClient.getHud().isEnabled()) {
-				ci.cancel();
-			}
+		if (MessageIngest.onServerSystemMessage(KksChatModClient.getHud(), message)) {
+			ci.cancel();
 		}
 	}
 }
-

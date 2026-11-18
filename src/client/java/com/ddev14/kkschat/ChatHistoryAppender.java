@@ -21,21 +21,22 @@ public final class ChatHistoryAppender {
 	private ChatHistoryAppender() {}
 
 	/**
-	 * Добавляет сообщение любого типа в историю.
+	 * Adds a message to the history. {@code candidate} is a new, not yet stored entry;
+	 * if it repeats the previous message it is merged into it instead.
+	 *
+	 * @return the stored entry (new or the one it was merged into), or null if a rule hid it
 	 */
-	public static ChatMessageEntry addLine(KksChatHud hud,
-			Component message, PlayerInfo senderInfo, PlayerInfo receiverInfo,
-			MessageType type, String senderName) {
-		if (message == null) return null;
+	public static ChatMessageEntry addLine(KksChatHud hud, ChatMessageEntry candidate) {
+		if (candidate == null || candidate.message == null) return null;
 
 		if (hud.isAntiSpamEnabled() && !hud.messageHistory.isEmpty()) {
 			ChatMessageEntry last = hud.messageHistory.get(hud.messageHistory.size() - 1);
-			if (isIdentical(last, message, senderInfo, type)) {
-				return mergeInto(last, message, senderInfo, receiverInfo, type, senderName);
+			if (isIdentical(last, candidate)) {
+				return mergeInto(last, candidate);
 			}
 		}
 
-		ChatMessageEntry entry = new ChatMessageEntry(message, senderInfo, receiverInfo, type, senderName);
+		ChatMessageEntry entry = candidate;
 
 		// Apply config rules
 		if (!hud.rules.isEmpty()) {
@@ -69,9 +70,7 @@ public final class ChatHistoryAppender {
 					}
 				} else {
 					for (int i = 0; i < entry.repeatCount; i++) {
-						expanded.add(new ChatMessageEntry(
-								entry.message, entry.senderInfo, entry.receiverInfo,
-								entry.type, entry.senderName));
+						expanded.add(entry.copySingle());
 					}
 				}
 			} else {
@@ -95,9 +94,8 @@ public final class ChatHistoryAppender {
 		for (ChatMessageEntry entry : source) {
 			if (!hud.messageHistory.isEmpty()) {
 				ChatMessageEntry last = hud.messageHistory.get(hud.messageHistory.size() - 1);
-				if (isIdentical(last, entry.message, entry.senderInfo, entry.type)) {
-					mergeInto(last, entry.message, entry.senderInfo, entry.receiverInfo,
-							entry.type, entry.senderName);
+				if (isIdentical(last, entry)) {
+					mergeInto(last, entry);
 					continue;
 				}
 			}
@@ -114,11 +112,14 @@ public final class ChatHistoryAppender {
 
 	// ── internal helpers ──────────────────────────────────────────────────────
 
-	private static boolean isIdentical(ChatMessageEntry last,
-			Component message, PlayerInfo senderInfo, MessageType type) {
-		if (last.type != type) return false;
-		if (!last.message.getString().equals(message.getString())) return false;
-		return sameSender(last.senderInfo, senderInfo);
+	/** Same kind, same people, same direction and same visible text. */
+	private static boolean isIdentical(ChatMessageEntry last, ChatMessageEntry next) {
+		if (last.type != next.type) return false;
+		if (last.direction != next.direction) return false;
+		if (!java.util.Objects.equals(last.receiverName, next.receiverName)) return false;
+		if (!last.message.getString().equals(next.message.getString())) return false;
+		return sameSender(last.senderInfo, next.senderInfo)
+				&& java.util.Objects.equals(last.senderName, next.senderName);
 	}
 
 	private static boolean sameSender(PlayerInfo a, PlayerInfo b) {
@@ -127,26 +128,21 @@ public final class ChatHistoryAppender {
 		return false;
 	}
 
-	private static ChatMessageEntry mergeInto(ChatMessageEntry last,
-			Component message, PlayerInfo senderInfo, PlayerInfo receiverInfo,
-			MessageType type, String senderName) {
+	private static ChatMessageEntry mergeInto(ChatMessageEntry last, ChatMessageEntry next) {
 		last.repeatCount++;
 		last.timestamp = System.currentTimeMillis();
 
 		if (last.expandedMessages == null) {
 			last.expandedMessages = new ArrayList<>();
-			last.expandedMessages.add(new ChatMessageEntry(
-					last.message, last.senderInfo, last.receiverInfo,
-					last.type, last.senderName));
+			last.expandedMessages.add(last.copySingle());
 		}
-		last.expandedMessages.add(new ChatMessageEntry(
-				message, senderInfo, receiverInfo, type, senderName));
+		last.expandedMessages.add(next);
 
-		if (last.senderInfo == null && senderInfo != null) {
-			last.updateSenderInfo(senderInfo);
+		if (last.senderInfo == null && next.senderInfo != null) {
+			last.updateSenderInfo(next.senderInfo);
 		}
-		if (last.senderName == null && senderName != null) {
-			last.senderName = senderName;
+		if (last.receiverInfo == null && next.receiverInfo != null) {
+			last.receiverInfo = next.receiverInfo;
 		}
 		return last;
 	}

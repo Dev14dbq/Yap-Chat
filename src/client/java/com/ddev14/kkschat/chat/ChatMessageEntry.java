@@ -13,6 +13,10 @@ public final class ChatMessageEntry {
 	public Component message;
 	public PlayerInfo senderInfo;
 	public PlayerInfo receiverInfo;
+	/** Recipient of an outgoing whisper (profile name); null otherwise. */
+	public String receiverName;
+	/** Whisper direction relative to the local player. */
+	public com.ddev14.kkschat.pipeline.Direction direction = com.ddev14.kkschat.pipeline.Direction.NONE;
 	public MessageType type;
 	public long timestamp;
 	public long firstMessageTime;
@@ -60,6 +64,18 @@ public final class ChatMessageEntry {
 	public boolean isJoinMessage()  { return type == MessageType.JOIN_LEAVE; }
 	public boolean isScreenshot()   { return type == MessageType.SCREENSHOT; }
 	public boolean isSystemMessage(){ return type.isSystem(); }
+
+	/** A fresh single copy of this message (same text, people and direction), for grouping. */
+	public ChatMessageEntry copySingle() {
+		ChatMessageEntry c = new ChatMessageEntry(message, senderInfo, receiverInfo, type, senderName);
+		c.direction = direction;
+		c.receiverName = receiverName;
+		if (senderUUID != null) c.senderUUID = senderUUID;
+		c.iconOverride = iconOverride;
+		c.noStyle = noStyle;
+		c.displayTimeOverride = displayTimeOverride;
+		return c;
+	}
 
 	public void updateSenderInfo(PlayerInfo newInfo) {
 		if (newInfo != null && (senderInfo == null || senderUUID == null || senderUUID.equals(newInfo.getProfile().id()))) {
